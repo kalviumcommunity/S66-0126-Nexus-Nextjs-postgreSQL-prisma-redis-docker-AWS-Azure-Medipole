@@ -200,7 +200,7 @@
 
 ## ❤️ ***Final Note***
 
-*Medipole is not just a software project—it is a step toward building technology that saves lives by ensuring the right information reaches the right people at the right time.*
+Medipole is not just a software project—it is a step toward building technology that saves lives by ensuring the right information reaches the right people at the right time.
 
 >**“Technology should not just innovate — it should serve humanity.”**
 
