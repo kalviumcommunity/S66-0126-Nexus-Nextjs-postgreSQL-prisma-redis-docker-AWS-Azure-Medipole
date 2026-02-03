@@ -117,6 +117,152 @@ This structure separates UI components, business logic, and route definitions, m
 
 This structure positions the team well for scaling the application in future sprints, supporting the addition of new user roles, features, and integrations while maintaining code quality and developer productivity.
 
+## Code Quality & Consistency
+
+This project enforces strict code quality standards through TypeScript, ESLint, Prettier, and pre-commit hooks to ensure clean, consistent, and bug-free code throughout development.
+
+### TypeScript Configuration
+
+The project uses strict TypeScript settings to catch potential errors early:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+**Benefits:**
+
+- `strict: true` - Enables all strict type-checking options
+- `noImplicitAny: true` - Prevents implicit `any` types, ensuring explicit typing
+- `noUnusedLocals: true` - Catches unused variables and functions
+- `noUnusedParameters: true` - Identifies unused function parameters
+- `forceConsistentCasingInFileNames: true` - Prevents casing mismatches in imports
+
+### ESLint Configuration
+
+ESLint is configured with Next.js best practices and Prettier integration:
+
+```javascript
+// eslint.config.mjs
+import eslintPluginPrettier from "eslint-plugin-prettier";
+import eslintConfigPrettier from "eslint-config-prettier";
+
+{
+  rules: {
+    "no-console": "warn",  // Warns about console statements
+    "prettier/prettier": "error"  // Enforces Prettier formatting
+  }
+}
+```
+
+**Enforced Rules:**
+
+- No console statements (warning level)
+- Consistent code formatting through Prettier integration
+- Next.js core web vitals compliance
+- TypeScript best practices
+
+### Prettier Configuration
+
+Prettier ensures consistent code formatting across the team:
+
+```json
+{
+  "singleQuote": false,
+  "semi": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 80
+}
+```
+
+**Formatting Standards:**
+
+- Double quotes for strings
+- Semicolons required
+- 2-space indentation
+- Trailing commas in ES5-compatible contexts
+- 80 character line width
+
+### Pre-commit Hooks
+
+Husky and lint-staged automatically run quality checks before each commit:
+
+```json
+"lint-staged": {
+  "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+  "*.{json,md,css}": ["prettier --write"]
+}
+```
+
+**What happens on commit:**
+
+1. TypeScript type checking runs automatically
+2. ESLint checks and fixes JavaScript/TypeScript files
+3. Prettier formats all staged files
+4. Commit is rejected if any checks fail
+
+### Available Scripts
+
+```bash
+# Run TypeScript type checking
+npm run type-check
+
+# Run ESLint (check for issues)
+npm run lint
+
+# Run ESLint and automatically fix issues
+npm run lint:fix
+
+# Format all files with Prettier
+npm run format
+
+# Check if files follow Prettier formatting
+npm run format:check
+```
+
+### Why This Matters
+
+**Reduced Runtime Bugs:**
+
+- Strict TypeScript catches type errors at compile time
+- Unused code detection prevents dead code accumulation
+- Consistent casing prevents import resolution issues
+
+**Team Consistency:**
+
+- Automatic formatting eliminates style debates
+- Shared configuration ensures all team members follow same standards
+- Pre-commit hooks prevent inconsistent code from entering the repository
+
+**Professional Development Experience:**
+
+- Industry-standard tools and configurations
+- Automated quality gates reduce manual code review burden
+- Clean, readable code that's easy to maintain and extend
+
+### Testing the Setup
+
+The configuration has been tested and verified:
+
+```bash
+# All checks should pass
+npm run type-check    # ✅ TypeScript compilation successful
+npm run lint          # ✅ No ESLint errors
+npm run format:check  # ✅ All files properly formatted
+git commit            # ✅ Pre-commit hooks execute successfully
+```
+
+This setup ensures that every commit meets our quality standards, making the codebase reliable and maintainable for the entire team throughout the sprint.
+
 ## Screenshot of Local App Running
 
 ![Medipole App Screenshot](./public/FolderImg.png)
