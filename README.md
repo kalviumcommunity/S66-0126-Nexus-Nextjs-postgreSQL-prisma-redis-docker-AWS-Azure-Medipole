@@ -38,6 +38,68 @@
 
 ### ***2. Hospital / Blood Bank***
 
+---
+
+## 🌱 Environment Variable Management
+
+This project uses [Next.js environment variable support](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables) to safely manage secrets and configuration.
+
+### Files
+
+- **.env.local**: Store actual secrets (e.g., database URLs, API keys). **Never commit this file.**
+- **.env.example**: Provide placeholder values and document each variable’s purpose and scope (server vs client). Commit this file to help collaborators set up their own environments.
+
+### Example Variables
+
+| Variable Name           | Example Value                        | Purpose/Scope                        | Exposed to Client? |
+|------------------------|--------------------------------------|--------------------------------------|:------------------:|
+| DATABASE_URL           | postgresql://user:pass@localhost/db  | Database connection string (server)  |        No         |
+| SECRET_API_KEY         | your_secret_api_key_here              | Secret API key for backend (server)  |        No         |
+| NEXT_PUBLIC_API_URL    | https://api.example.com               | Public API base URL (client/server)  |       Yes         |
+
+**Server-only variables** (like `DATABASE_URL`, `SECRET_API_KEY`) are accessed via `process.env` and are never sent to the browser.
+
+**Client-safe variables** must be prefixed with `NEXT_PUBLIC_` (e.g., `NEXT_PUBLIC_API_URL`). Only these are exposed to client-side code.
+
+### Build-time vs Runtime
+
+- **Build-time**: Next.js loads environment variables at build time. Changing `.env.local` requires a server restart to take effect.
+- **Runtime**: Only variables prefixed with `NEXT_PUBLIC_` are available in client-side code at runtime.
+
+### Protecting Secrets
+
+- `.env.local` is **not** committed to git. Ensure `.env.local` is listed in `.gitignore` (see below).
+- Never put secrets in `.env.example`—use placeholders only.
+- Only expose variables to the client if absolutely necessary and always use the `NEXT_PUBLIC_` prefix.
+
+### Common Pitfalls & How We Avoided Them
+
+- **Accidental secret exposure**: By using `.env.local` (gitignored) for real secrets and `.env.example` for documentation, we prevent leaks.
+- **Client/server confusion**: We clearly document which variables are server-only and which are safe for the client, and enforce the `NEXT_PUBLIC_` prefix for client variables.
+- **Forgetting to restart**: Remember to restart the dev server after changing environment variables.
+
+### Example Usage in Code
+
+```ts
+// Server-side (e.g., API route or getServerSideProps)
+const dbUrl = process.env.DATABASE_URL;
+const secret = process.env.SECRET_API_KEY;
+
+// Client-side (only NEXT_PUBLIC_ variables)
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+```
+
+### .gitignore
+
+Ensure your `.gitignore` includes:
+
+```
+# Environment variables
+.env.local
+```
+
+---
+
 >*Manage blood inventory in real time*
 >
 >*Raise emergency blood requests*
