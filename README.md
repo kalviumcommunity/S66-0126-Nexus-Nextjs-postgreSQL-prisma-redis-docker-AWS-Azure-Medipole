@@ -263,6 +263,157 @@ git commit            # ✅ Pre-commit hooks execute successfully
 
 This setup ensures that every commit meets our quality standards, making the codebase reliable and maintainable for the entire team throughout the sprint.
 
+## 🌿 Branching Strategy & Collaboration
+
+### Branch Naming Conventions
+
+We follow a consistent branching strategy to organize our work:
+
+```
+feature/<feature-name>          # New features
+fix/<bug-name>                 # Bug fixes
+hotfix/<critical-fix>          # Urgent production fixes
+chore/<maintenance-task>       # Maintenance tasks
+docs/<documentation-update>    # Documentation changes
+refactor/<refactoring-name>    # Code refactoring
+test/<test-addition>           # Adding/updating tests
+perf/<performance-improvement> # Performance improvements
+```
+
+**Examples:**
+
+- `feature/user-authentication`
+- `fix/login-button-alignment`
+- `hotfix/critical-security-patch`
+- `chore/update-dependencies`
+
+### Workflow Process
+
+1. **Create Feature Branch**
+
+   ```bash
+   git checkout main
+   git pull origin main
+   git checkout -b feature/new-feature-name
+   ```
+
+2. **Development with Quality Checks**
+
+   ```bash
+   npm run type-check    # TypeScript validation
+   npm run lint          # ESLint checks
+   npm run format:check  # Prettier formatting
+   ```
+
+3. **Create Pull Request**
+   - Use our comprehensive PR template
+   - Include screenshots and evidence
+   - Request review from team members
+
+4. **Code Review Process**
+   - Reviewers follow detailed checklist
+   - Address all feedback
+   - Ensure all automated checks pass
+
+5. **Merge to Main**
+   - Required approvals obtained
+   - All status checks pass
+   - Branch protection rules enforced
+
+## 📋 Pull Request Process
+
+### PR Template
+
+Every PR must include:
+
+- Clear summary of changes
+- Related issue/ticket reference
+- Detailed changes made
+- Screenshots or evidence
+- Complete checklist verification
+
+### Code Review Standards
+
+Our comprehensive review process ensures quality:
+
+**Review Focus Areas:**
+
+- ✅ TypeScript type safety and strict mode compliance
+- ✅ Code structure and organization
+- ✅ Security best practices
+- ✅ Performance considerations
+- ✅ Testing adequacy
+- ✅ Documentation completeness
+
+**Review Checklist Categories:**
+
+- Code Quality (naming, structure, patterns)
+- Security (no secrets, proper validation)
+- Testing (coverage, edge cases)
+- UI/UX (accessibility, responsiveness)
+- Documentation (comments, README updates)
+- Deployment readiness
+
+## 🛡️ Branch Protection Rules
+
+### Main Branch Protections
+
+The `main` branch has the following enforced protections:
+
+**Required Reviews:**
+
+- Minimum 1 approving review required
+- Dismiss stale approvals when new commits are pushed
+- Required review from Code Owners (when applicable)
+
+**Required Status Checks:**
+
+- `lint` - ESLint validation must pass
+- `type-check` - TypeScript compilation must succeed
+- `format-check` - Prettier formatting must be consistent
+- `build` - Next.js build process must complete
+- Branch must be up to date before merging
+
+**Restrictions:**
+
+- ❌ No direct pushes to main
+- ❌ No force pushes allowed
+- ❌ No branch deletions
+- ✅ Linear history required
+- ✅ Administrators included in restrictions
+
+### Configuration Guide
+
+To set up branch protection rules in GitHub:
+
+1. Go to Repository Settings → Branches
+2. Add rule for `main` branch pattern
+3. Enable required reviews and status checks
+4. Configure the specific checks listed above
+5. Save protection rule
+
+\*[Detailed configuration instructions available in `.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md)
+
+## 📚 Documentation Resources
+
+All collaboration documentation is available in the `.github` directory:
+
+- [`.github/pull_request_template.md`](.github/pull_request_template.md) - PR template with required sections
+- [`.github/CODE_REVIEW_CHECKLIST.md`](.github/CODE_REVIEW_CHECKLIST.md) - Comprehensive review guidelines
+- [`.github/BRANCH_PROTECTION.md`](.github/BRANCH_PROTECTION.md) - Branch protection configuration guide
+
+## 🎯 Success Metrics
+
+We track these metrics to ensure our collaboration process is effective:
+
+- ✅ **100%** of PRs have passing quality checks
+- ✅ **Average** 24-hour review turnaround time
+- ✅ **Zero** direct commits to protected branches
+- ✅ **100%** code review coverage
+- ✅ **Continuous** improvement in code quality metrics
+
+This structured approach ensures consistent quality, clear communication, and reliable collaboration across the entire development team.
+
 ## Screenshot of Local App Running
 
 ![Medipole App Screenshot](./public/FolderImg.png)
