@@ -578,3 +578,266 @@ Your database is now in sync with your schema.
 - [ ] Verify data integrity post-migration
 
 ---
+## ***RESTful API Endpoints***
+
+Medipole provides a comprehensive RESTful API for managing blood donation operations. All endpoints follow REST conventions with proper HTTP methods, status codes, and resource-based naming.
+
+### ***API Route Hierarchy***
+
+```
+/api
+├── /users              # User management
+│   ├── GET             # List all users (paginated)
+│   ├── POST            # Create new user
+│   └── /[id]
+│       ├── GET         # Get user by ID
+│       ├── PATCH       # Update user
+│       └── DELETE      # Delete user
+│
+├── /donors             # Donor profiles
+│   ├── GET             # List donors (with blood group filter)
+│   ├── POST            # Create donor profile
+│   └── /[id]
+│       ├── GET         # Get donor details
+│       ├── PATCH       # Update donor profile
+│       └── DELETE      # Delete donor
+│
+├── /hospitals          # Hospital profiles
+│   ├── GET             # List hospitals (with verification filter)
+│   ├── POST            # Create hospital profile
+│   └── /[id]
+│       ├── GET         # Get hospital details
+│       ├── PATCH       # Update hospital
+│       └── DELETE      # Delete hospital
+│
+├── /inventory          # Blood inventory management
+│   ├── GET             # List inventory (with filters)
+│   ├── POST            # Add inventory entry
+│   └── /[id]
+│       ├── GET         # Get specific inventory
+│       ├── PATCH       # Update inventory units
+│       └── DELETE      # Delete inventory entry
+│
+└── /requests           # Emergency blood requests
+    ├── GET             # List requests (with status filter)
+    ├── POST            # Create emergency request
+    └── /[id]
+        ├── GET         # Get request details
+        ├── PATCH       # Update request status
+        └── DELETE      # Cancel request
+```
+
+### ***HTTP Methods & Status Codes***
+
+| Method | Purpose | Success Code | Error Codes |
+|--------|---------|--------------|-------------|
+| `GET` | Retrieve resource(s) | 200 OK | 404 Not Found, 500 Internal Server Error |
+| `POST` | Create new resource | 201 Created | 400 Bad Request, 409 Conflict, 500 |
+| `PATCH` | Update existing resource | 200 OK | 400 Bad Request, 404 Not Found, 500 |
+| `DELETE` | Remove resource | 200 OK | 404 Not Found, 500 |
+
+### ***Sample API Requests & Responses***
+
+#### **1. List Users (with Pagination)**
+
+```bash
+curl -X GET "http://localhost:3000/api/users?page=1&limit=5"
+```
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "cmlge3qwj0000y2nvvp5tyugf",
+      "email": "admin@medipole.com",
+      "role": "ADMIN",
+      "createdAt": "2026-02-10T09:19:47.423Z",
+      "updatedAt": "2026-02-10T09:19:47.423Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 5,
+    "total": 3,
+    "totalPages": 1
+  }
+}
+```
+
+#### **2. Filter Donors by Blood Group**
+
+```bash
+curl -X GET "http://localhost:3000/api/donors?bloodGroup=A_POSITIVE"
+```
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "cmlge3qx70007y2nvczw7fgoz",
+      "userId": "cmlge3qx70006y2nvs2fs5sna",
+      "bloodGroup": "A_POSITIVE",
+      "phone": "+919876543210",
+      "latitude": 12.9816,
+      "longitude": 77.6046,
+      "user": {
+        "email": "johndoe@example.com",
+        "role": "DONOR"
+      }
+    }
+  ],
+  "pagination": { "page": 1, "limit": 10, "total": 1, "totalPages": 1 }
+}
+```
+
+#### **3. Create New Blood Request**
+
+```bash
+curl -X POST "http://localhost:3000/api/requests" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "hospitalId": "cmlge3qwx0002y2nvcrydvoa7",
+    "bloodGroup": "O_NEGATIVE",
+    "unitsRequired": 3,
+    "details": "Emergency surgery"
+  }'
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": "new_request_id",
+  "hospitalId": "cmlge3qwx0002y2nvcrydvoa7",
+  "bloodGroup": "O_NEGATIVE",
+  "unitsRequired": 3,
+  "status": "PENDING",
+  "details": "Emergency surgery",
+  "createdAt": "2026-02-10T10:00:00.000Z",
+  "hospital": {
+    "name": "City General Hospital",
+    "address": "123 Health St, Metro City"
+  }
+}
+```
+
+#### **4. Update Inventory Units**
+
+```bash
+curl -X PATCH "http://localhost:3000/api/inventory/[id]" \
+  -H "Content-Type: application/json" \
+  -d '{"units": 15}'
+```
+
+**Response:**
+```json
+{
+  "id": "inventory_id",
+  "hospitalId": "hospital_id",
+  "bloodGroup": "A_POSITIVE",
+  "units": 15,
+  "updatedAt": "2026-02-10T10:05:00.000Z"
+}
+```
+
+#### **5. Get Verified Hospitals**
+
+```bash
+curl -X GET "http://localhost:3000/api/hospitals?isVerified=true"
+```
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": "cmlge3qwx0002y2nvcrydvoa7",
+      "name": "City General Hospital",
+      "address": "123 Health St, Metro City",
+      "isVerified": true,
+      "inventory": [
+        { "bloodGroup": "A_POSITIVE", "units": 10 },
+        { "bloodGroup": "O_NEGATIVE", "units": 5 }
+      ]
+    }
+  ],
+  "pagination": { "page": 1, "limit": 10, "total": 1, "totalPages": 1 }
+}
+```
+
+### ***Error Handling***
+
+All endpoints return consistent error responses:
+
+```json
+{
+  "error": "Error message description"
+}
+```
+
+**Common Error Scenarios:**
+
+| Status Code | Scenario | Example |
+|-------------|----------|---------|
+| 400 | Missing required fields | `{"error": "userId and bloodGroup are required"}` |
+| 404 | Resource not found | `{"error": "Donor not found"}` |
+| 409 | Duplicate entry | `{"error": "User with this email already exists"}` |
+| 500 | Server error | `{"error": "Failed to fetch users"}` |
+
+### ***Pagination & Filtering***
+
+#### **Pagination Parameters**
+
+All list endpoints support pagination via query parameters:
+
+- `page` (default: 1) - Page number
+- `limit` (default: 10) - Items per page
+
+**Example:**
+```bash
+curl "http://localhost:3000/api/users?page=2&limit=20"
+```
+
+#### **Filtering Parameters**
+
+Resource-specific filters:
+
+| Endpoint | Filter | Example |
+|----------|--------|---------|
+| `/api/donors` | `bloodGroup` | `?bloodGroup=A_POSITIVE` |
+| `/api/hospitals` | `isVerified` | `?isVerified=true` |
+| `/api/inventory` | `hospitalId`, `bloodGroup` | `?hospitalId=xyz&bloodGroup=O_NEGATIVE` |
+| `/api/requests` | `status` | `?status=PENDING` |
+
+### ***Design Principles & Reflections***
+
+#### **RESTful Naming Conventions**
+
+✅ **Do:**
+- Use plural nouns: `/api/users`, `/api/donors`
+- Use HTTP methods for actions: `GET /users`, not `/getUsers`
+- Use path parameters for IDs: `/users/[id]`
+- Use query params for filters: `/donors?bloodGroup=A_POSITIVE`
+
+❌ **Don't:**
+- Use verbs in URLs: `/createUser`, `/deleteHospital`
+- Mix singular and plural: `/user`, `/donors`
+- Use special characters or spaces
+
+#### **Benefits of Consistent API Design**
+
+1. **Predictability**: Developers can guess endpoint structure without documentation
+2. **Maintainability**: Clear patterns make it easier to add new resources
+3. **Integration**: Third-party tools and clients work seamlessly
+4. **Debugging**: Consistent error formats simplify troubleshooting
+5. **Scalability**: Well-structured APIs are easier to version and extend
+
+#### **Error Design Philosophy**
+
+- **Meaningful Status Codes**: Use HTTP standards (200, 201, 400, 404, 500)
+- **Descriptive Messages**: Errors explain what went wrong and why
+- **Consistent Format**: All errors follow the same JSON structure
+- **Prisma Error Handling**: Map database errors (P2025, P2002) to appropriate HTTP codes
+
+---
