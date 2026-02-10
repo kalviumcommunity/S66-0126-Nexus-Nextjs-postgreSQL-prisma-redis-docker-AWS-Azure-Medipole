@@ -260,7 +260,86 @@ Ensure your `.gitignore` includes:
 
 ***This project is developed for educational and social-impact purposes.***
 
-## ❤️ ***Final Note***
+## $🗄$ ***Database Design (Prisma & PostgreSQL)***
+
+The Medipole database is designed to handle real-time inventory tracking, user management, and emergency blood requests with high data integrity and scalability.
+
+### ***ER Diagram***
+
+```mermaid
+erDiagram
+    USER ||--o| DONOR_PROFILE : "has"
+    USER ||--o| HOSPITAL_PROFILE : "has"
+    HOSPITAL_PROFILE ||--o{ INVENTORY : "manages"
+    HOSPITAL_PROFILE ||--o{ BLOOD_REQUEST : "creates"
+    HOSPITAL_PROFILE ||--o{ DONATION_HISTORY : "receives"
+    DONOR_PROFILE ||--o{ DONATION_HISTORY : "performs"
+
+    USER {
+        string id PK
+        string email UK
+        string password
+        enum role
+    }
+
+    DONOR_PROFILE {
+        string id PK
+        string userId FK
+        enum bloodGroup
+        datetime lastDonationDate
+        float latitude
+        float longitude
+    }
+
+    HOSPITAL_PROFILE {
+        string id PK
+        string userId FK
+        string name
+        string address
+        boolean isVerified
+    }
+
+    INVENTORY {
+        string id PK
+        string hospitalId FK
+        enum bloodGroup
+        int units
+    }
+
+    BLOOD_REQUEST {
+        string id PK
+        string hospitalId FK
+        enum bloodGroup
+        int unitsRequired
+        enum status
+    }
+```
+
+### ***Schema Explanation***
+
+- **Keys & Constraints**:
+    - **Primary Keys (PK)**: All models use `cuid()` for globally unique identifiers.
+    - **Foreign Keys (FK)**: Established using Prisma relations (e.g., `userId` in `DonorProfile` references `id` in `User`).
+    - **Unique Constraints**: `User.email` and the combination of `hospitalId` and `bloodGroup` in `Inventory` are unique to prevent duplicate entries.
+    - **Enums**: Used for `BloodGroup`, `UserRole`, and `RequestStatus` to ensure data consistency.
+
+- **Normalization**:
+    - **1NF**: All columns contain atomic values; no repeating groups.
+    - **2NF**: All non-key attributes are fully functional dependent on the primary key. Split `User` into `DonorProfile` and `HospitalProfile` to avoid null-heavy tables.
+    - **3NF**: Eliminated transitive dependencies. For example, `Inventory` relates directly to a `HospitalProfile`, not through a `User`.
+
+### ***Scalability & Performance***
+
+- **Indexing**: Frequent lookups on `email`, `hospitalId`, and `bloodGroup` are optimized via unique constraints and implicit indexes.
+- **Geolocation**: Storing `latitude` and `longitude` as `Float` allows for efficient distance-based queries (e.g., finding the nearest donor).
+- **Common Queries**:
+    - *Find nearby donors*: Filter `DonorProfile` by distance using lat/lng.
+    - *Real-time inventory*: Aggregate `Inventory` units across hospitals in a specific city.
+    - *Emergency Matching*: Join `BloodRequest` with `DonorProfile` filtered by `bloodGroup` and distance.
+
+---
+
+❤️ ***Final Note***
 
 Medipole is not just a software project—it is a step toward building technology that saves lives by ensuring the right information reaches the right people at the right time.
 

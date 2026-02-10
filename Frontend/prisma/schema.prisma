@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  DONOR
+  HOSPITAL
+  ADMIN
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
+
+enum RequestStatus {
+  PENDING
+  FULFILLED
+  CANCELLED
+}
+
+model User {
+  id              String           @id @default(cuid())
+  email           String           @unique
+  password        String
+  role            UserRole         @default(DONOR)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  donorProfile    DonorProfile?
+  hospitalProfile HospitalProfile?
+}
+
+model DonorProfile {
+  id               String            @id @default(cuid())
+  userId           String            @unique
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bloodGroup       BloodGroup
+  lastDonationDate DateTime?
+  latitude         Float?
+  longitude        Float?
+  phone            String?
+  donations        DonationHistory[]
+}
+
+model HospitalProfile {
+  id          String         @id @default(cuid())
+  userId      String         @unique
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  address     String
+  latitude    Float?
+  longitude   Float?
+  isVerified  Boolean        @default(false)
+  inventory   Inventory[]
+  requests    BloodRequest[]
+  donations   DonationHistory[]
+}
+
+model Inventory {
+  id         String          @id @default(cuid())
+  hospitalId String
+  hospital   HospitalProfile @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  bloodGroup BloodGroup
+  units      Int             @default(0)
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([hospitalId, bloodGroup])
+}
+
+model BloodRequest {
+  id            String          @id @default(cuid())
+  hospitalId    String
+  hospital      HospitalProfile @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  bloodGroup    BloodGroup
+  unitsRequired Int
+  status        RequestStatus   @default(PENDING)
+  details       String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model DonationHistory {
+  id           String          @id @default(cuid())
+  donorId      String
+  donor        DonorProfile    @relation(fields: [donorId], references: [id], onDelete: Cascade)
+  hospitalId   String
+  hospital     HospitalProfile @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+  donationDate DateTime        @default(now())
+  units        Int             @default(1)
+}
