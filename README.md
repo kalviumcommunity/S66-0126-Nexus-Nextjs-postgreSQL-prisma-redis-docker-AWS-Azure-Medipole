@@ -6,13 +6,13 @@
 
 *The platform connects donors, hospitals/blood banks, and NGOs through secure authentication, geolocation-based matching, and live availability dashboards to ensure timely access to blood when it matters most.*
 
-## $🚀$ ***Problem Statement***
+##  ***Problem Statement***
 
 **India’s vast network of blood banks and hospitals often faces shortages - not because of lack of donors, but due to poor coordination and outdated inventory tracking. How might we build a real-time, full-stack blood donation and inventory management platform that connects donors, hospitals, and NGOs - leveraging geolocation, live availability dashboards, and secure authentication - to ensure no life is lost due to a data gap?**
 
 >***Medipole*** is our solution.
 
-## $🎯$ ***Key Objectives***
+##  ***Key Objectives***
 
 >**Enable real-time blood inventory tracking across hospitals and blood banks**
 
@@ -40,7 +40,7 @@
 
 ---
 
-## 🌱 Environment Variable Management
+##  Environment Variable Management
 
 This project uses [Next.js environment variable support](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables) to safely manage secrets and configuration.
 
@@ -118,9 +118,9 @@ Ensure your `.gitignore` includes:
 >
 >*Ensure data authenticity and platform integrity*
 
-## $✨$ ***Core Features***
+##  ***Core Features***
 
-### $🔐$ $Secure$ $Authentication$ & $Authorization$
+###  $Secure$ $Authentication$ & $Authorization$
 
 - ***JWT-based authentication***
 
@@ -128,7 +128,7 @@ Ensure your `.gitignore` includes:
 
 - ***Encrypted password storage***
 
-### $📍$ $Geolocation-Based$ $Matching$
+###  $Geolocation-Based$ $Matching$
 
 - ***Locate nearby donors and hospitals***
 
@@ -136,7 +136,7 @@ Ensure your `.gitignore` includes:
 
 - ***Interactive map view***
 
-### $🩸$ $Real-Time$ $Blood$ $Inventory$ $Management$
+###  $Real-Time$ $Blood$ $Inventory$ $Management$
 
 - ***Blood group-wise tracking (A+, A-, B+, B-, AB+, AB-, O+, O-)***
 
@@ -146,7 +146,7 @@ Ensure your `.gitignore` includes:
 
 - ***Low-stock alerts***
 
-### $📊$ $Live$ $Availability$ $Dashboard$
+### $Live$ $Availability$ $Dashboard$
 
 - ***Real-time inventory status***
 
@@ -154,7 +154,7 @@ Ensure your `.gitignore` includes:
 
 - ***Visual status indicators (Available / Low / Critical)***
 
-### $🚨$ $Emergency$ $Blood$ $Request$ $System$
+###  $Emergency$ $Blood$ $Request$ $System$
 
 - ***Hospitals can raise urgent requests***
 
@@ -162,7 +162,7 @@ Ensure your `.gitignore` includes:
 
 - ***Donors can accept or decline requests***
 
-### $📈$ $Analytics$ & $Insights$ $(Admin)$
+### $Analytics$ & $Insights$ $(Admin)$
 
 - ***Blood demand trends***
 
@@ -172,7 +172,7 @@ Ensure your `.gitignore` includes:
 
 - ***Donation success metrics***
 
-### $🧩$ $Application$ $Sections$
+###  $Application$ $Sections$
 
 - >***Landing Page*** $–$ $Platform$ $overview,$ $live$ $stats,$ $quick$ $search$
 
@@ -222,7 +222,7 @@ Ensure your `.gitignore` includes:
 
 - ***Object storage*** (AWS S3 / Azure Blob Storage)
 
-## $🧠$ ***System Architecture (High-Level)***
+##  ***System Architecture (High-Level)***
 
 - >*User authenticates using* ***JWT***
 
@@ -234,7 +234,7 @@ Ensure your `.gitignore` includes:
 
 - >*Admin monitors and analyzes platform-wide data*
 
-## $📌$ ***Why This Project Matters***
+##  ***Why This Project Matters***
 
 - ***Solves a real-world healthcare coordination problem***
 
@@ -246,7 +246,7 @@ Ensure your `.gitignore` includes:
 
 - ***Highly relevant for product, backend, and full-stack roles***
 
-## $🧪$ ***Future Scope***
+## ***Future Scope***
 
 >- Mobile application support
 
@@ -256,11 +256,11 @@ Ensure your `.gitignore` includes:
 
 >- Government and hospital system integration
 
-## $📄$ ***License***
+##  ***License***
 
 ***This project is developed for educational and social-impact purposes.***
 
-## $🗄$ ***Database Design (Prisma & PostgreSQL)***
+##  ***Database Design (Prisma & PostgreSQL)***
 
 The Medipole database is designed to handle real-time inventory tracking, user management, and emergency blood requests with high data integrity and scalability.
 
@@ -337,11 +337,60 @@ erDiagram
     - *Real-time inventory*: Aggregate `Inventory` units across hospitals in a specific city.
     - *Emergency Matching*: Join `BloodRequest` with `DonorProfile` filtered by `bloodGroup` and distance.
 
+##  ***Prisma ORM Integration***
+
+We use Prisma as our Object-Relational Mapper (ORM) to interact with the PostgreSQL database. Prisma provides a type-safe client that improves developer productivity and reduces common database errors.
+
+### ***Setup Steps***
+
+1. **Install Dependencies**:
+   ```bash
+   npm install prisma --save-dev
+   npm install @prisma/client
+   ```
+2. **Initialize Prisma**:
+   ```bash
+   npx prisma init
+   ```
+3. **Define Models**: Models are defined in `prisma/schema.prisma` using the Prisma Schema Language.
+4. **Generate Client**:
+   ```bash
+   npx prisma generate
+   ```
+
+### ***Prisma Client Initialization***
+
+We implement a singleton pattern for the Prisma Client to prevent multiple instances from being created during development hot-reloading.
+
+```ts
+// src/lib/prisma.ts
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+```
+
+### ***Verification***
+
+A test API route at `/api/test` handles connection checks:
+
+- **Logs**: Successful connection shows `prisma:query` logs in the terminal.
+- **Payload**: Returns a JSON object indicating connection status and sample data.
+
+### ***Reflection***
+
+- **Type Safety**: Prisma automatically generates TypeScript types based on our schema, ensuring that our queries match the database structure.
+- **Reliability**: Relations are clearly defined and enforced by Prisma, reducing runtime errors related to missing or malformed data.
+- **Productivity**: Features like autocompletion for queries and Prisma Studio make database management significantly faster.
+
 ---
 
-❤️ ***Final Note***
 
-Medipole is not just a software project—it is a step toward building technology that saves lives by ensuring the right information reaches the right people at the right time.
-
->**“Technology should not just innovate — it should serve humanity.”**
 
