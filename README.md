@@ -394,3 +394,187 @@ A test API route at `/api/test` handles connection checks:
 
 
 
+## ***Database Migrations & Seeding***
+
+Prisma Migrate helps you evolve your database schema safely and keep it in sync with your Prisma schema.
+
+### ***Migration Workflow***
+
+#### **Creating Your First Migration**
+
+When you define or modify models in `prisma/schema.prisma`, create a migration:
+
+```bash
+npx prisma migrate dev --name init_schema
+```
+
+This command:
+1. Generates SQL migration files in `prisma/migrations/`
+2. Applies changes to your PostgreSQL database
+3. Regenerates the Prisma Client with updated types
+
+#### **Adding New Models or Fields**
+
+When you add a new table or modify existing ones:
+
+```bash
+npx prisma migrate dev --name add_project_table
+```
+
+**Example**: Our initial migration `20260210091729_init_schema` created:
+- 3 Enums: `UserRole`, `BloodGroup`, `RequestStatus`
+- 5 Tables: `User`, `DonorProfile`, `HospitalProfile`, `Inventory`, `BloodRequest`, `DonationHistory`
+- Foreign key constraints with `ON DELETE CASCADE`
+- Unique indexes on email and composite keys
+
+#### **Reviewing Migration SQL**
+
+Always review generated SQL files before applying to production:
+
+```sql
+-- Example from our init_schema migration
+CREATE TYPE "UserRole" AS ENUM ('DONOR', 'HOSPITAL', 'ADMIN');
+
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "role" "UserRole" NOT NULL DEFAULT 'DONOR',
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+```
+
+### ***Rollback & Reset***
+
+#### **Reset Database (Development Only)**
+
+To reset your database and re-apply all migrations:
+
+```bash
+npx prisma migrate reset
+```
+
+This will:
+- Drop the database
+- Create a new database
+- Apply all migrations from scratch
+- Run seed data (if configured)
+
+> [!CAUTION]
+> **Never run `migrate reset` in production!** This will delete all data.
+
+#### **Production Migration Strategy**
+
+For production deployments:
+
+```bash
+npx prisma migrate deploy
+```
+
+This applies pending migrations without prompting or resetting.
+
+**Best Practices**:
+- Always test migrations in staging first
+- Create database backups before migrating
+- Use transactions where possible
+- Monitor migration execution time
+- Have a rollback plan ready
+
+### ***Database Seeding***
+
+Our seed script (`prisma/seed.ts`) populates the database with initial test data.
+
+#### **Seed Script Configuration**
+
+In `prisma.config.ts`:
+
+```ts
+migrations: {
+  path: "prisma/migrations",
+  seed: "ts-node prisma/seed.ts",
+}
+```
+
+#### **Running the Seed**
+
+```bash
+npx prisma db seed
+```
+
+**Our Seed Data Includes**:
+- 1 Admin user (`admin@medipole.com`)
+- 1 Hospital with inventory (City General Hospital)
+- 1 Donor profile (John Doe, A+ blood type)
+- Sample blood inventory and emergency request
+
+#### **Idempotency**
+
+Our seed script uses `upsert` to ensure idempotency:
+
+```ts
+await prisma.user.upsert({
+  where: { email: 'admin@medipole.com' },
+  update: {},
+  create: { /* ... */ }
+})
+```
+
+This prevents duplicate entries when re-running the seed.
+
+### ***Verification***
+
+#### **Using Prisma Studio**
+
+Launch the visual database browser:
+
+```bash
+npx prisma studio
+```
+
+This opens a GUI at `http://localhost:5555` where you can:
+- Browse all tables and records
+- Edit data directly
+- Verify relationships
+- Test queries
+
+#### **Migration Logs**
+
+Successful migration output:
+
+```
+Prisma schema loaded from prisma/schema.prisma.
+Datasource "db": PostgreSQL database "medipole" at "localhost:5432"
+
+Applying migration `20260210091729_init_schema`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260210091729_init_schema/
+    └─ migration.sql
+
+Your database is now in sync with your schema.
+```
+
+### ***Production Safety Reflections***
+
+**How We Protect Production Data**:
+
+1. **Staging Environment**: All migrations are tested in a staging environment that mirrors production
+2. **Automated Backups**: Daily automated backups with point-in-time recovery
+3. **Migration Review**: All migration SQL is peer-reviewed before deployment
+4. **Gradual Rollout**: Use feature flags to enable new schema-dependent features gradually
+5. **Monitoring**: Track migration execution time and database performance metrics
+6. **Rollback Plan**: Maintain reverse migration scripts for critical changes
+
+**Migration Checklist**:
+- [ ] Test migration in local environment
+- [ ] Review generated SQL for correctness
+- [ ] Test in staging with production-like data
+- [ ] Create database backup
+- [ ] Deploy during low-traffic window
+- [ ] Monitor application logs and metrics
+- [ ] Verify data integrity post-migration
+
+---
