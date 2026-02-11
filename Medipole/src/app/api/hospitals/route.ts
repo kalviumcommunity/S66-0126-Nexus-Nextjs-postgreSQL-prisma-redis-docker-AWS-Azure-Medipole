@@ -1,16 +1,46 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { authenticate } from "@/lib/auth";
 
-// GET /api/hospitals - List all hospitals with optional verification filter
+/*
+  GET /api/hospitals
+  - ADMIN → can see all hospitals (with pagination + filter)
+  - HOSPITAL → can only see their own hospital profile
+*/
 export async function GET(request: Request) {
     try {
+        const user = authenticate(request);
+
         const { searchParams } = new URL(request.url);
-        const page = Number(searchParams.get('page')) || 1;
-        const limit = Number(searchParams.get('limit')) || 10;
-        const isVerified = searchParams.get('isVerified');
+        const page = Number(searchParams.get("page")) || 1;
+        const limit = Number(searchParams.get("limit")) || 10;
+        const isVerified = searchParams.get("isVerified");
+
         const skip = (page - 1) * limit;
 
-        const where = isVerified !== null ? { isVerified: isVerified === 'true' } : {};
+        // Base filter (verification filter)
+        const baseWhere =
+            isVerified !== null
+                ? { isVerified: isVerified === "true" }
+                : {};
+
+        let where: any = baseWhere;
+
+        if (user.role === "ADMIN") {
+            // ADMIN → can see all hospitals (with optional filter)
+            where = baseWhere;
+        } else if (user.role === "HOSPITAL") {
+            // HOSPITAL → can only see their own hospital
+            where = {
+                ...baseWhere,
+                userId: user.id,
+            };
+        } else {
+            return NextResponse.json(
+                { error: "Forbidden" },
+                { status: 403 }
+            );
+        }
 
         const [hospitals, total] = await Promise.all([
             prisma.hospitalProfile.findMany({
@@ -19,9 +49,7 @@ export async function GET(request: Request) {
                 take: limit,
                 include: {
                     user: {
-                        select: {
-                            email: true,
-                        },
+                        select: { email: true },
                     },
                     inventory: true,
                 },
@@ -39,23 +67,35 @@ export async function GET(request: Request) {
             },
         });
     } catch (error) {
-        console.error('Error fetching hospitals:', error);
         return NextResponse.json(
-            { error: 'Failed to fetch hospitals' },
-            { status: 500 }
+            { error: "Unauthorized" },
+            { status: 401 }
         );
     }
 }
 
-// POST /api/hospitals - Create a new hospital profile
+/*
+  POST /api/hospitals
+  - Only ADMIN can create hospital profile
+*/
 export async function POST(request: Request) {
     try {
+        const user = authenticate(request);
+
+        // Only ADMIN can create hospital profile
+        if (user.role !== "ADMIN") {
+            return NextResponse.json(
+                { error: "Forbidden" },
+                { status: 403 }
+            );
+        }
+
         const body = await request.json();
-        const { userId, name, address, latitude, longitude, isVerified } = body;
+        const { userId, name, address, latitude, longitude } = body;
 
         if (!userId || !name || !address) {
             return NextResponse.json(
-                { error: 'userId, name, and address are required' },
+                { error: "userId, name, and address are required" },
                 { status: 400 }
             );
         }
@@ -67,29 +107,27 @@ export async function POST(request: Request) {
                 address,
                 latitude,
                 longitude,
-                isVerified: isVerified || false,
+                isVerified: false,
             },
             include: {
                 user: {
-                    select: {
-                        email: true,
-                    },
+                    select: { email: true },
                 },
             },
         });
 
         return NextResponse.json(hospital, { status: 201 });
     } catch (error: any) {
-        if (error.code === 'P2002') {
+        if (error?.code === "P2002") {
             return NextResponse.json(
-                { error: 'Hospital profile already exists for this user' },
+                { error: "Hospital profile already exists for this user" },
                 { status: 409 }
             );
         }
-        console.error('Error creating hospital:', error);
+
         return NextResponse.json(
-            { error: 'Failed to create hospital profile' },
-            { status: 500 }
+            { error: "Unauthorized" },
+            { status: 401 }
         );
     }
 }
