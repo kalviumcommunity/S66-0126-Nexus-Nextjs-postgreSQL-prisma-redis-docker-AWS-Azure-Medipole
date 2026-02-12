@@ -1,9 +1,10 @@
-import { PrismaClient, UserRole, BloodGroup, RequestStatus } from '@prisma/client'
 import 'dotenv/config'
 import { Pool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { hash } from 'bcrypt'
 
+import * as PrismaPkg from '@prisma/client'
+const { PrismaClient } = PrismaPkg as any
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
@@ -12,6 +13,7 @@ async function main() {
   const hashedPassword = await hash('password123', 10)
 
   // Create Admin
+  const { UserRole, BloodGroup, RequestStatus } = PrismaPkg as any
   await prisma.user.upsert({
     where: { email: 'admin@medipole.com' },
     update: {},
