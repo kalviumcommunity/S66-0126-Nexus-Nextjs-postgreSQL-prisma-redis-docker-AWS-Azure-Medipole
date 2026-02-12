@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/requests/[id] - Get blood request by ID
 export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const bloodRequest = await prisma.bloodRequest.findUnique({
             where: { id: params.id },
             include: {
@@ -40,20 +42,15 @@ export async function GET(
 
 // PATCH /api/requests/[id] - Update blood request status
 export async function PATCH(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { status, details } = body;
 
-        const bloodRequest = await prisma.bloodRequest.update({
-            where: { id: params.id },
-            data: {
-                ...(status && { status }),
-                ...(details && { details }),
-            },
-        });
+        const bloodRequest = await prisma.bloodRequest.update({ where: { id: params.id }, data: { ...(status && { status }), ...(details && { details }) } });
 
         return NextResponse.json(bloodRequest);
     } catch (error: any) {
@@ -73,10 +70,12 @@ export async function PATCH(
 
 // DELETE /api/requests/[id] - Cancel/delete blood request
 export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.bloodRequest.delete({
             where: { id: params.id },
         });

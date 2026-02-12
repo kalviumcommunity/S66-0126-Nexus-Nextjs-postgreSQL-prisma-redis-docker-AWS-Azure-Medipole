@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/inventory/[id] - Get inventory by ID
 export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const inventory = await prisma.inventory.findUnique({
             where: { id: params.id },
             include: {
@@ -38,22 +40,19 @@ export async function GET(
 
 // PATCH /api/inventory/[id] - Update inventory units
 export async function PATCH(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { units } = body;
 
         if (units === undefined) {
-            return NextResponse.json(
-                { error: 'units is required' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'units is required' }, { status: 400 });
         }
 
-        const inventory = await prisma.inventory.update({
-            where: { id: params.id },
+        const inventory = await prisma.inventory.update({ where: { id: params.id },
             data: { units },
         });
 
@@ -75,10 +74,12 @@ export async function PATCH(
 
 // DELETE /api/inventory/[id] - Delete inventory entry
 export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.inventory.delete({
             where: { id: params.id },
         });

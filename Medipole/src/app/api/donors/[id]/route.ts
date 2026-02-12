@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/donors/[id] - Get donor by ID
 export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const donor = await prisma.donorProfile.findUnique({
             where: { id: params.id },
             include: {
@@ -47,10 +49,11 @@ export async function GET(
 
 // PATCH /api/donors/[id] - Update donor profile
 export async function PATCH(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { bloodGroup, phone, latitude, longitude, lastDonationDate } = body;
 
@@ -83,10 +86,12 @@ export async function PATCH(
 
 // DELETE /api/donors/[id] - Delete donor profile
 export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.donorProfile.delete({
             where: { id: params.id },
         });

@@ -7,10 +7,6 @@ import { NextResponse } from "next/server";
  * to improve developer experience and observability.
  */
 
-interface ErrorResponse {
-  code: string;
-  details?: any;
-}
 
 /**
  * Send a successful response with standardized format
