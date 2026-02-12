@@ -47,6 +47,68 @@ Static assets served directly by the Next.js server
 - `eslint.config.mjs` - ESLint configuration
 - `.env` - Environment variables (not committed to version control)
 
+## Route Map & Architecture
+
+### Routing Overview
+
+The App Router in Next.js uses a file-based routing system. Each folder inside the `app/` directory represents a route, and `page.tsx` files define the renderable pages.
+
+### Route Structure
+
+```
+src/app/
+├── page.tsx                      → Home (public)
+├── layout.tsx                    → Global layout with navigation
+├── not-found.tsx                 → Custom 404 page
+├── login/
+│   └── page.tsx                  → Login page (public)
+├── dashboard/
+│   └── page.tsx                  → Protected route
+├── users/
+│   ├── page.tsx                  → Users list (protected)
+│   └── [id]/
+│       └── page.tsx              → Dynamic user profile page (protected)
+├── middleware.ts                 → Auth middleware
+└── api/
+    ├── auth/login/route.ts       → Login API endpoint
+    ├── users/route.ts            → Users API endpoint
+    ├── admin/route.ts            → Admin API endpoint
+    └── [other API routes]
+```
+
+### Route Classification
+
+#### Public Routes
+- **`/`** - Home page (Welcome to Medipole)
+- **`/login`** - Login page
+
+#### Protected Routes (Require valid JWT token)
+- **`/dashboard`** - User dashboard
+- **`/users`** - Users list
+- **`/users/[id]`** - Dynamic user profile page
+
+#### API Routes
+- **`/api/auth/login`** - Login endpoint (public)
+- **`/api/users`** - User management (protected)
+- **`/api/admin`** - Admin endpoints (protected, admin only)
+
+### Authentication Flow
+
+1. User visits `/login` (public)
+2. User clicks "Login" button
+3. Token is set in browser cookies
+4. User is redirected to `/dashboard`
+5. Middleware verifies JWT token before allowing access
+6. If token is invalid/missing, user is redirected to `/login`
+
+### Key Concepts
+
+- **`page.tsx`** - Defines a page route
+- **`[id]/page.tsx`** - Defines a dynamic route where `id` can be any value
+- **`layout.tsx`** - Wraps shared UI like navigation bars
+- **`middleware.ts`** - Protects routes and verifies authentication
+- **`not-found.tsx`** - Custom error page for missing routes
+
 ## Setup Instructions
 
 ### Installation
@@ -73,6 +135,7 @@ Create a `.env.local` file in the root of the Frontend directory and add the fol
 NEXT_PUBLIC_API_URL=http://localhost:3001/api
 NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+JWT_SECRET=your_jwt_secret_key
 ```
 
 ### Running the Application Locally
@@ -90,6 +153,70 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Testing the Routes
+
+### Testing Public Routes
+1. Visit `http://localhost:3000/` - Should see the home page
+2. Visit `http://localhost:3000/login` - Should see the login page without authentication
+
+### Testing Protected Routes
+1. Try visiting `http://localhost:3000/dashboard` without logging in → Should redirect to `/login`
+2. Try visiting `http://localhost:3000/users/1` without logging in → Should redirect to `/login`
+3. Click "Login" button on `/login` page
+4. After successful login, you should be redirected to `/dashboard`
+5. Now you can access `/users/[id]` pages (e.g., `/users/1`, `/users/42`, etc.)
+
+### Testing Dynamic Routes
+- Visit `/users/1` to see user profile for ID 1
+- Visit `/users/2` to see user profile for ID 2
+- Visit `/users/abc` to see user profile for ID abc
+- Visit any undefined route (e.g., `/nonexistent`) to see the custom 404 page
+
+## Reflection: Why This Structure?
+
+### Dynamic Routing Benefits
+
+1. **Scalability**: Dynamic routes (`[id]`) allow the same component to handle infinite variations without creating separate pages
+2. **SEO Optimization**: Each dynamic route is treated as a unique page, improving search engine indexing
+3. **User Experience**: Breadcrumbs and structured navigation improve usability
+4. **Performance**: Next.js optimizes dynamic pages automatically with incremental static regeneration (ISR)
+
+### Middleware & Authentication
+
+1. **Security**: Middleware intercepts requests before they reach route handlers
+2. **Centralized Auth Logic**: All authentication checks happen in one place
+3. **User Experience**: Transparent redirects without exposing auth errors
+4. **Token Management**: JWT tokens in cookies are automatically sent with requests
+
+### Error Handling
+
+1. **Custom 404 Pages**: `not-found.tsx` provides a branded error experience
+2. **Graceful Degradation**: Invalid routes don't crash the app
+3. **Clear Messaging**: Users understand what went wrong and how to recover
+
+### Layout & Shared Navigation
+
+1. **DRY Principle**: Navigation bar is defined once in `layout.tsx`
+2. **Consistency**: All pages share the same header/footer structure
+3. **Maintainability**: Changes to navigation affect all pages automatically
+
+## Reflection: SEO & Routing Best Practices
+
+### SEO Advantages
+
+- **Structured Routing**: Clear URL hierarchy improves search engine understanding
+- **Dynamic Meta Tags**: Each page can have custom title and description
+- **Breadcrb Navigation**: Users and search engines can understand page hierarchy
+- **Static Export**: Pages can be pre-rendered for faster loading
+
+### Routing Best Practices
+
+1. **Meaningful URLs**: Use descriptive route names (`/dashboard`, `/users/[id]`)
+2. **Consistent Structure**: Keep routes organized and predictable
+3. **Protected Routes**: Use middleware to enforce authentication
+4. **Error States**: Always handle missing data gracefully
+5. **Navigation**: Provide clear links between related pages
 
 ## Reflection: Why This Structure?
 
