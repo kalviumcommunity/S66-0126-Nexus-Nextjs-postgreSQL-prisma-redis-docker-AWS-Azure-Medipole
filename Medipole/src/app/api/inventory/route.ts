@@ -54,31 +54,24 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { hospitalId, bloodGroup, units } = body;
+        try {
+            const data = (await import("@/lib/schemas/inventorySchema")).inventorySchema.parse(body);
+            const { hospitalId, bloodGroup, units } = data;
 
-        if (!hospitalId || !bloodGroup || units === undefined) {
-            return NextResponse.json(
-                { error: 'hospitalId, bloodGroup, and units are required' },
-                { status: 400 }
-            );
+            const inventory = await prisma.inventory.create({
+                data: { hospitalId, bloodGroup, units },
+                include: { hospital: { select: { name: true } } },
+            });
+
+            return NextResponse.json(inventory, { status: 201 });
+        } catch (e: any) {
+            const { ZodError } = await import("zod");
+            if (e instanceof ZodError) {
+                const { zodErrorResponse } = await import("@/lib/validation");
+                return zodErrorResponse(e);
+            }
+            throw e;
         }
-
-        const inventory = await prisma.inventory.create({
-            data: {
-                hospitalId,
-                bloodGroup,
-                units,
-            },
-            include: {
-                hospital: {
-                    select: {
-                        name: true,
-                    },
-                },
-            },
-        });
-
-        return NextResponse.json(inventory, { status: 201 });
     } catch (error: any) {
         if (error.code === 'P2002') {
             return NextResponse.json(

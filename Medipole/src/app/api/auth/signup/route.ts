@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
+import { signupSchema } from "@/lib/schemas/userSchema";
+import { ZodError } from "zod";
+import { zodErrorResponse } from "@/lib/validation";
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password, role } = await req.json();
+        const body = await req.json();
+        const data = signupSchema.parse(body);
 
-        if (!name || !email || !password)
-            return NextResponse.json(
-                { success: false, message: "All fields required" },
-                { status: 400 }
-            );
+        const { name, email, password, role } = data;
 
-        const existingUser = await prisma.user.findUnique({
-            where: { email },
-        });
+        const existingUser = await prisma.user.findUnique({ where: { email } });
 
         if (existingUser)
             return NextResponse.json(
@@ -24,23 +22,13 @@ export async function POST(req: Request) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-                role: role || "DONOR",
-            },
+        await prisma.user.create({
+            data: { name, email, password: hashedPassword, role: role || "DONOR" },
         });
 
-        return NextResponse.json({
-            success: true,
-            message: "Signup successful",
-        });
-    } catch (error) {
-        return NextResponse.json(
-            { success: false, message: "Signup failed" },
-            { status: 500 }
-        );
+        return NextResponse.json({ success: true, message: "Signup successful" });
+    } catch (error: any) {
+        if (error instanceof ZodError) return zodErrorResponse(error);
+        return NextResponse.json({ success: false, message: "Signup failed" }, { status: 500 });
     }
 }

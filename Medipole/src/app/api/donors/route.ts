@@ -51,34 +51,24 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { userId, bloodGroup, phone, latitude, longitude } = body;
+        try {
+            const data = (await import("@/lib/schemas/donorSchema")).donorSchema.parse(body);
+            const { userId, bloodGroup, phone, latitude, longitude } = data;
 
-        if (!userId || !bloodGroup) {
-            return NextResponse.json(
-                { error: 'userId and bloodGroup are required' },
-                { status: 400 }
-            );
+            const donor = await prisma.donorProfile.create({
+                data: { userId, bloodGroup, phone, latitude, longitude },
+                include: { user: { select: { email: true, role: true } } },
+            });
+
+            return NextResponse.json(donor, { status: 201 });
+        } catch (e: any) {
+            const { ZodError } = await import("zod");
+            if (e instanceof ZodError) {
+                const { zodErrorResponse } = await import("@/lib/validation");
+                return zodErrorResponse(e);
+            }
+            throw e;
         }
-
-        const donor = await prisma.donorProfile.create({
-            data: {
-                userId,
-                bloodGroup,
-                phone,
-                latitude,
-                longitude,
-            },
-            include: {
-                user: {
-                    select: {
-                        email: true,
-                        role: true,
-                    },
-                },
-            },
-        });
-
-        return NextResponse.json(donor, { status: 201 });
     } catch (error: any) {
         if (error.code === 'P2002') {
             return NextResponse.json(

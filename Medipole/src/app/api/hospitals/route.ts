@@ -91,32 +91,24 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json();
-        const { userId, name, address, latitude, longitude } = body;
+        try {
+            const data = (await import("@/lib/schemas/hospitalSchema")).hospitalSchema.parse(body);
+            const { userId, name, address, latitude, longitude } = data;
 
-        if (!userId || !name || !address) {
-            return NextResponse.json(
-                { error: "userId, name, and address are required" },
-                { status: 400 }
-            );
+            const hospital = await prisma.hospitalProfile.create({
+                data: { userId, name, address, latitude, longitude, isVerified: false },
+                include: { user: { select: { email: true } } },
+            });
+
+            return NextResponse.json(hospital, { status: 201 });
+        } catch (e: any) {
+            const { ZodError } = await import("zod");
+            if (e instanceof ZodError) {
+                const { zodErrorResponse } = await import("@/lib/validation");
+                return zodErrorResponse(e);
+            }
+            throw e;
         }
-
-        const hospital = await prisma.hospitalProfile.create({
-            data: {
-                userId,
-                name,
-                address,
-                latitude,
-                longitude,
-                isVerified: false,
-            },
-            include: {
-                user: {
-                    select: { email: true },
-                },
-            },
-        });
-
-        return NextResponse.json(hospital, { status: 201 });
     } catch (error: any) {
         if (error?.code === "P2002") {
             return NextResponse.json(

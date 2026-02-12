@@ -54,34 +54,24 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { hospitalId, bloodGroup, unitsRequired, details } = body;
+        try {
+            const data = (await import("@/lib/schemas/requestSchema")).requestSchema.parse(body);
+            const { hospitalId, bloodGroup, unitsRequired, details } = data;
 
-        if (!hospitalId || !bloodGroup || !unitsRequired) {
-            return NextResponse.json(
-                { error: 'hospitalId, bloodGroup, and unitsRequired are required' },
-                { status: 400 }
-            );
+            const bloodRequest = await prisma.bloodRequest.create({
+                data: { hospitalId, bloodGroup, unitsRequired, details, status: 'PENDING' },
+                include: { hospital: { select: { name: true, address: true } } },
+            });
+
+            return NextResponse.json(bloodRequest, { status: 201 });
+        } catch (e: any) {
+            const { ZodError } = await import("zod");
+            if (e instanceof ZodError) {
+                const { zodErrorResponse } = await import("@/lib/validation");
+                return zodErrorResponse(e);
+            }
+            throw e;
         }
-
-        const bloodRequest = await prisma.bloodRequest.create({
-            data: {
-                hospitalId,
-                bloodGroup,
-                unitsRequired,
-                details,
-                status: 'PENDING',
-            },
-            include: {
-                hospital: {
-                    select: {
-                        name: true,
-                        address: true,
-                    },
-                },
-            },
-        });
-
-        return NextResponse.json(bloodRequest, { status: 201 });
     } catch (error) {
         console.error('Error creating blood request:', error);
         return NextResponse.json(
