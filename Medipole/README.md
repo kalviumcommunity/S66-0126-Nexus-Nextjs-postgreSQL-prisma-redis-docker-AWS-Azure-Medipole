@@ -414,6 +414,222 @@ We track these metrics to ensure our collaboration process is effective:
 
 This structured approach ensures consistent quality, clear communication, and reliable collaboration across the entire development team.
 
+## 🔄 Global API Response Handler
+
+We've implemented a standardized response format across all API endpoints to ensure consistent error handling and improved developer experience.
+
+### Response Format
+
+All API responses follow this unified structure:
+
+```json
+{
+  "success": true/false,
+  "message": "Description of the outcome",
+  "data"?: { ... }, // Present in successful responses
+  "error"?: {
+    "code": "ERROR_CODE",
+    "details"?: { ... } // Additional error details
+  }, // Present in error responses
+  "timestamp": "ISO timestamp"
+}
+```
+
+### Example Responses
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Users fetched successfully",
+  "data": [
+    { "id": 1, "name": "Alice Johnson", "email": "alice@example.com" }
+  ],
+  "timestamp": "2026-02-05T07:30:00.000Z"
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "message": "Missing required field: name",
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "details": {
+      "field": "name",
+      "message": "Name is required"
+    }
+  },
+  "timestamp": "2026-02-05T07:30:00.000Z"
+}
+```
+
+### Response Handler Functions
+
+The `responseHandler.ts` utility provides several helper functions:
+
+- `sendSuccess(data, message, status)` - For successful responses
+- `sendError(message, code, status, details)` - For error responses
+- `sendValidationError(message, details)` - For validation errors (400)
+- `sendNotFound(message)` - For not found errors (404)
+- `sendUnauthorized(message)` - For unauthorized access (401)
+- `sendForbidden(message)` - For forbidden access (403)
+
+### Example API Route Usage
+
+**GET /api/tasks:**
+```typescript
+import { sendSuccess, sendError } from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+
+export async function GET() {
+  try {
+    const tasks = await fetchTasksFromDatabase();
+    return sendSuccess(tasks, "Tasks fetched successfully");
+  } catch (err) {
+    return sendError(
+      "Failed to fetch tasks", 
+      ERROR_CODES.INTERNAL_ERROR, 
+      500, 
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+```
+
+**POST /api/tasks:**
+```typescript
+import { sendSuccess, sendValidationError, sendError } from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+
+export async function POST(req: Request) {
+  try {
+    const data = await req.json();
+    
+    if (!data.title) {
+      return sendValidationError("Missing required field: title", {
+        field: "title",
+        message: "Title is required"
+      });
+    }
+    
+    if (!data.priority) {
+      return sendValidationError("Missing required field: priority", {
+        field: "priority",
+        message: "Priority is required (low, medium, high)"
+      });
+    }
+    
+    // Check if task already exists
+    const existingTask = tasks.find(task => task.title === data.title);
+    if (existingTask) {
+      return sendError(
+        "Task with this title already exists",
+        ERROR_CODES.ALREADY_EXISTS,
+        409
+      );
+    }
+    
+    // Create new task (mock implementation)
+    const newTask = {
+      id: tasks.length + 1,
+      title: data.title,
+      completed: data.completed || false,
+      priority: data.priority,
+      createdAt: new Date().toISOString()
+    };
+    
+    tasks.push(newTask);
+    
+    return sendSuccess(newTask, "Task created successfully", 201);
+  } catch (err) {
+    return sendError(
+      "Failed to create task",
+      ERROR_CODES.INTERNAL_ERROR,
+      500,
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+```
+
+**GET /api/users:**
+```typescript
+import { sendSuccess, sendError } from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+
+export async function GET() {
+  try {
+    const users = await fetchUsersFromDatabase();
+    return sendSuccess(users, "Users fetched successfully");
+  } catch (err) {
+    return sendError(
+      "Failed to fetch users", 
+      ERROR_CODES.INTERNAL_ERROR, 
+      500, 
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+```
+
+**POST /api/users:**
+```typescript
+import { sendSuccess, sendValidationError, sendError } from "@/lib/responseHandler";
+import { ERROR_CODES } from "@/lib/errorCodes";
+
+export async function POST(req: Request) {
+  try {
+    const data = await req.json();
+    
+    if (!data.name) {
+      return sendValidationError("Missing required field: name", {
+        field: "name",
+        message: "Name is required"
+      });
+    }
+    
+    if (!data.email) {
+      return sendValidationError("Missing required field: email", {
+        field: "email",
+        message: "Email is required"
+      });
+    }
+    
+    const newUser = await createUser(data);
+    return sendSuccess(newUser, "User created successfully", 201);
+  } catch (err) {
+    return sendError(
+      "Failed to create user",
+      ERROR_CODES.INTERNAL_ERROR,
+      500,
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+```
+
+### Standardized Error Codes
+
+The system uses predefined error codes for consistency:
+
+- `VALIDATION_ERROR` (E001) - Validation failures
+- `NOT_FOUND` (E201) - Resource not found
+- `DATABASE_FAILURE` (E301) - Database errors
+- `INTERNAL_ERROR` (E500) - Unexpected errors
+- `UNAUTHORIZED` (E101) - Authentication failures
+
+### Benefits
+
+1. **Improved Developer Experience**: Consistent response structure simplifies frontend logic
+2. **Better Debugging**: Standardized error codes make issue tracking easier
+3. **Enhanced Observability**: Structured responses facilitate monitoring and logging
+4. **Reduced Errors**: Centralized response handling minimizes inconsistencies
+5. **Team Consistency**: All developers use the same response patterns
+
+This global response handler ensures that every API endpoint speaks the same "language," making the application more maintainable and easier to debug.
+
 ## Screenshot of Local App Running
 
 ![Medipole App Screenshot](./public/FolderImg.png)
