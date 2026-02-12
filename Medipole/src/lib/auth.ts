@@ -1,5 +1,4 @@
 import { verifyToken } from "./jwt";
-import { NextResponse } from "next/server";
 
 export function authenticate(req: Request) {
     const authHeader = req.headers.get("authorization");
