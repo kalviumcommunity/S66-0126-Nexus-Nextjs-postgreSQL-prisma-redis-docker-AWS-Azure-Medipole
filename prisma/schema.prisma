@@ -1,0 +1,246 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+//////////////////////
+// ENUMS
+//////////////////////
+
+enum Role {
+  DONOR
+  HOSPITAL
+  NGO
+  ADMIN
+}
+
+enum BloodGroup {
+  A_POSITIVE
+  A_NEGATIVE
+  B_POSITIVE
+  B_NEGATIVE
+  AB_POSITIVE
+  AB_NEGATIVE
+  O_POSITIVE
+  O_NEGATIVE
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  FULFILLED
+  CANCELLED
+}
+
+enum ResponseStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+//////////////////////
+// USER MODEL
+//////////////////////
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(DONOR)
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  donorProfile    DonorProfile?
+  hospitalProfile HospitalProfile?
+  ngoProfile      NGOProfile?
+
+  notifications   Notification[]
+}
+
+//////////////////////
+// DONOR
+//////////////////////
+
+model DonorProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bloodGroup       BloodGroup
+  lastDonationDate DateTime?
+  latitude         Float?
+  longitude        Float?
+  phone            String?
+
+  isActive         Boolean  @default(true)
+
+  donations        DonationHistory[]
+  requestResponses RequestResponse[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+//////////////////////
+// HOSPITAL
+//////////////////////
+
+model HospitalProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  address     String
+  latitude    Float?
+  longitude   Float?
+
+  isVerified  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+
+  inventory   Inventory[]
+  requests    BloodRequest[]
+  donations   DonationHistory[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+//////////////////////
+// NGO
+//////////////////////
+
+model NGOProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationName String
+  description      String?
+  phone            String?
+  address          String?
+
+  isVerified       Boolean @default(false)
+  isActive         Boolean @default(true)
+
+  campaigns        Campaign[]
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+//////////////////////
+// INVENTORY
+//////////////////////
+
+model Inventory {
+  id         String          @id @default(cuid())
+  hospitalId String
+  hospital   HospitalProfile @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  bloodGroup BloodGroup
+  units      Int             @default(0)
+
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([hospitalId, bloodGroup])
+}
+
+//////////////////////
+// BLOOD REQUEST
+//////////////////////
+
+model BloodRequest {
+  id            String          @id @default(cuid())
+  hospitalId    String
+  hospital      HospitalProfile @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  bloodGroup    BloodGroup
+  unitsRequired Int
+  details       String?
+
+  status        RequestStatus   @default(PENDING)
+
+  responses     RequestResponse[]
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+//////////////////////
+// REQUEST RESPONSE (Donor → Request)
+//////////////////////
+
+model RequestResponse {
+  id        String        @id @default(cuid())
+  requestId String
+  donorId   String
+
+  request   BloodRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  donor     DonorProfile  @relation(fields: [donorId], references: [id], onDelete: Cascade)
+
+  status    ResponseStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  @@unique([requestId, donorId])
+}
+
+//////////////////////
+// DONATION HISTORY
+//////////////////////
+
+model DonationHistory {
+  id           String          @id @default(cuid())
+  donorId      String
+  hospitalId   String
+
+  donor        DonorProfile    @relation(fields: [donorId], references: [id], onDelete: Cascade)
+  hospital     HospitalProfile @relation(fields: [hospitalId], references: [id], onDelete: Cascade)
+
+  donationDate DateTime        @default(now())
+  units        Int             @default(1)
+
+  createdAt    DateTime        @default(now())
+}
+
+//////////////////////
+// NGO CAMPAIGNS
+//////////////////////
+
+model Campaign {
+  id        String      @id @default(cuid())
+  ngoId     String
+  ngo       NGOProfile  @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+
+  title     String
+  description String?
+  location  String?
+
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+//////////////////////
+// NOTIFICATIONS
+//////////////////////
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+}
