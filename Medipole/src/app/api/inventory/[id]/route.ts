@@ -7,6 +7,8 @@ export async function GET(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const inventory = await prisma.inventory.findUnique({
             where: { id: params.id },
             include: {
@@ -42,18 +44,15 @@ export async function PATCH(
     context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { units } = body;
 
         if (units === undefined) {
-            return NextResponse.json(
-                { error: 'units is required' },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: 'units is required' }, { status: 400 });
         }
 
-        const inventory = await prisma.inventory.update({
-            where: { id: params.id },
+        const inventory = await prisma.inventory.update({ where: { id: params.id },
             data: { units },
         });
 
@@ -79,6 +78,8 @@ export async function DELETE(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.inventory.delete({
             where: { id: params.id },
         });

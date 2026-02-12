@@ -7,6 +7,8 @@ export async function GET(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const hospital = await prisma.hospitalProfile.findUnique({
             where: { id: params.id },
             include: {
@@ -43,6 +45,7 @@ export async function PATCH(
     context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { name, address, latitude, longitude, isVerified } = body;
 
@@ -79,6 +82,8 @@ export async function DELETE(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.hospitalProfile.delete({
             where: { id: params.id },
         });

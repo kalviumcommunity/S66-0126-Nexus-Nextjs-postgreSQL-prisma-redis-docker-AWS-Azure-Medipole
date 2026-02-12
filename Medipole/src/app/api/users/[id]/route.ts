@@ -7,6 +7,8 @@ export async function GET(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const user = await prisma.user.findUnique({
             where: { id: params.id },
             select: {
@@ -43,6 +45,7 @@ export async function PATCH(
     context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { email, role } = body;
 
@@ -82,6 +85,8 @@ export async function DELETE(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.user.delete({
             where: { id: params.id },
         });

@@ -7,6 +7,8 @@ export async function GET(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const bloodRequest = await prisma.bloodRequest.findUnique({
             where: { id: params.id },
             include: {
@@ -44,16 +46,11 @@ export async function PATCH(
     context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { status, details } = body;
 
-        const bloodRequest = await prisma.bloodRequest.update({
-            where: { id: params.id },
-            data: {
-                ...(status && { status }),
-                ...(details && { details }),
-            },
-        });
+        const bloodRequest = await prisma.bloodRequest.update({ where: { id: params.id }, data: { ...(status && { status }), ...(details && { details }) } });
 
         return NextResponse.json(bloodRequest);
     } catch (error: any) {
@@ -77,6 +74,8 @@ export async function DELETE(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.bloodRequest.delete({
             where: { id: params.id },
         });

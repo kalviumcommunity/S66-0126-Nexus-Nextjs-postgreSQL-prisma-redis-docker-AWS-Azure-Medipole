@@ -7,6 +7,8 @@ export async function GET(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         const donor = await prisma.donorProfile.findUnique({
             where: { id: params.id },
             include: {
@@ -51,6 +53,7 @@ export async function PATCH(
     context: any
 ) {
     try {
+        const { params } = context;
         const body = await request.json();
         const { bloodGroup, phone, latitude, longitude, lastDonationDate } = body;
 
@@ -87,6 +90,8 @@ export async function DELETE(
     context: any
 ) {
     try {
+        const { params } = context;
+        void request;
         await prisma.donorProfile.delete({
             where: { id: params.id },
         });
