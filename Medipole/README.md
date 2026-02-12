@@ -634,4 +634,32 @@ This global response handler ensures that every API endpoint speaks the same "la
 
 ![Medipole App Screenshot](./public/FolderImg.png)
 
-_Above: Screenshot of the Medipole application running locally showing the main dashboard interface._
+## Docker Container
+
+![Docker Desktop](./public/ContainerImg.png)
+
+## Docker Terminal
+
+![Docker Terminal](./public/TerminalImg.png)
+
+<!-- _Above: Screenshot of the Medipole application running locally showing the main dashboard interface._ -->
+
+## Hospital
+
+### GET
+
+>Role	Access
+>
+>ADMIN	All hospitals (with pagination + filter)
+>
+>HOSPITAL	Only their own hospital
+>
+>Others	403 Forbidden
+
+### POST
+
+>Role	Access
+>
+>ADMIN	Can create hospital profile
+>
+>Others	403 Forbidden
