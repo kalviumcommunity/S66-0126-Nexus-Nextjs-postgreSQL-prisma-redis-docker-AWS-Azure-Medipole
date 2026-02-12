@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/requests/[id] - Get blood request by ID
 export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         const bloodRequest = await prisma.bloodRequest.findUnique({
@@ -40,8 +40,8 @@ export async function GET(
 
 // PATCH /api/requests/[id] - Update blood request status
 export async function PATCH(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         const body = await request.json();
@@ -73,8 +73,8 @@ export async function PATCH(
 
 // DELETE /api/requests/[id] - Cancel/delete blood request
 export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         await prisma.bloodRequest.delete({

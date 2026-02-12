@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/hospitals/[id] - Get hospital by ID
 export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         const hospital = await prisma.hospitalProfile.findUnique({
@@ -39,8 +39,8 @@ export async function GET(
 
 // PATCH /api/hospitals/[id] - Update hospital profile
 export async function PATCH(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         const body = await request.json();
@@ -75,8 +75,8 @@ export async function PATCH(
 
 // DELETE /api/hospitals/[id] - Delete hospital profile
 export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         await prisma.hospitalProfile.delete({

@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 // GET /api/inventory/[id] - Get inventory by ID
 export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         const inventory = await prisma.inventory.findUnique({
@@ -38,8 +38,8 @@ export async function GET(
 
 // PATCH /api/inventory/[id] - Update inventory units
 export async function PATCH(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         const body = await request.json();
@@ -75,8 +75,8 @@ export async function PATCH(
 
 // DELETE /api/inventory/[id] - Delete inventory entry
 export async function DELETE(
-    request: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    context: any
 ) {
     try {
         await prisma.inventory.delete({
