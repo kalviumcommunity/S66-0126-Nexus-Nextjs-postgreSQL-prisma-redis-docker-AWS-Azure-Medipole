@@ -663,3 +663,4 @@ This global response handler ensures that every API endpoint speaks the same "la
 >ADMIN	Can create hospital profile
 >
 >Others	403 Forbidden
+
