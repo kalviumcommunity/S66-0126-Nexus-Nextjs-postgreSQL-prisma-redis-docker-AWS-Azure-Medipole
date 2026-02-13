@@ -438,18 +438,18 @@ All API responses follow this unified structure:
 ### Example Responses
 
 **Success Response:**
+
 ```json
 {
   "success": true,
   "message": "Users fetched successfully",
-  "data": [
-    { "id": 1, "name": "Alice Johnson", "email": "alice@example.com" }
-  ],
+  "data": [{ "id": 1, "name": "Alice Johnson", "email": "alice@example.com" }],
   "timestamp": "2026-02-05T07:30:00.000Z"
 }
 ```
 
 **Error Response:**
+
 ```json
 {
   "success": false,
@@ -479,6 +479,7 @@ The `responseHandler.ts` utility provides several helper functions:
 ### Example API Route Usage
 
 **GET /api/tasks:**
+
 ```typescript
 import { sendSuccess, sendError } from "@/lib/responseHandler";
 import { ERROR_CODES } from "@/lib/errorCodes";
@@ -489,9 +490,9 @@ export async function GET() {
     return sendSuccess(tasks, "Tasks fetched successfully");
   } catch (err) {
     return sendError(
-      "Failed to fetch tasks", 
-      ERROR_CODES.INTERNAL_ERROR, 
-      500, 
+      "Failed to fetch tasks",
+      ERROR_CODES.INTERNAL_ERROR,
+      500,
       err instanceof Error ? err.message : String(err)
     );
   }
@@ -499,30 +500,35 @@ export async function GET() {
 ```
 
 **POST /api/tasks:**
+
 ```typescript
-import { sendSuccess, sendValidationError, sendError } from "@/lib/responseHandler";
+import {
+  sendSuccess,
+  sendValidationError,
+  sendError,
+} from "@/lib/responseHandler";
 import { ERROR_CODES } from "@/lib/errorCodes";
 
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    
+
     if (!data.title) {
       return sendValidationError("Missing required field: title", {
         field: "title",
-        message: "Title is required"
+        message: "Title is required",
       });
     }
-    
+
     if (!data.priority) {
       return sendValidationError("Missing required field: priority", {
         field: "priority",
-        message: "Priority is required (low, medium, high)"
+        message: "Priority is required (low, medium, high)",
       });
     }
-    
+
     // Check if task already exists
-    const existingTask = tasks.find(task => task.title === data.title);
+    const existingTask = tasks.find((task) => task.title === data.title);
     if (existingTask) {
       return sendError(
         "Task with this title already exists",
@@ -530,18 +536,18 @@ export async function POST(req: Request) {
         409
       );
     }
-    
+
     // Create new task (mock implementation)
     const newTask = {
       id: tasks.length + 1,
       title: data.title,
       completed: data.completed || false,
       priority: data.priority,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-    
+
     tasks.push(newTask);
-    
+
     return sendSuccess(newTask, "Task created successfully", 201);
   } catch (err) {
     return sendError(
@@ -555,6 +561,7 @@ export async function POST(req: Request) {
 ```
 
 **GET /api/users:**
+
 ```typescript
 import { sendSuccess, sendError } from "@/lib/responseHandler";
 import { ERROR_CODES } from "@/lib/errorCodes";
@@ -565,9 +572,9 @@ export async function GET() {
     return sendSuccess(users, "Users fetched successfully");
   } catch (err) {
     return sendError(
-      "Failed to fetch users", 
-      ERROR_CODES.INTERNAL_ERROR, 
-      500, 
+      "Failed to fetch users",
+      ERROR_CODES.INTERNAL_ERROR,
+      500,
       err instanceof Error ? err.message : String(err)
     );
   }
@@ -575,28 +582,33 @@ export async function GET() {
 ```
 
 **POST /api/users:**
+
 ```typescript
-import { sendSuccess, sendValidationError, sendError } from "@/lib/responseHandler";
+import {
+  sendSuccess,
+  sendValidationError,
+  sendError,
+} from "@/lib/responseHandler";
 import { ERROR_CODES } from "@/lib/errorCodes";
 
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    
+
     if (!data.name) {
       return sendValidationError("Missing required field: name", {
         field: "name",
-        message: "Name is required"
+        message: "Name is required",
       });
     }
-    
+
     if (!data.email) {
       return sendValidationError("Missing required field: email", {
         field: "email",
-        message: "Email is required"
+        message: "Email is required",
       });
     }
-    
+
     const newUser = await createUser(data);
     return sendSuccess(newUser, "User created successfully", 201);
   } catch (err) {
@@ -630,6 +642,516 @@ The system uses predefined error codes for consistency:
 
 This global response handler ensures that every API endpoint speaks the same "language," making the application more maintainable and easier to debug.
 
+## 🔒 Centralized Error Handling & Structured Logging
+
+Modern applications require robust error handling to maintain reliability, security, and observability. Medipole implements a comprehensive centralized error handling system with structured logging for consistency, security, and better debugging.
+
+### Why Centralized Error Handling Matters
+
+**Consistency**: Every error follows a uniform response format, making frontend error handling predictable and simple.
+
+**Security**: Stack traces and sensitive data are automatically hidden in production, protecting against information disclosure vulnerabilities.
+
+**Observability**: Structured JSON logs make it easy to parse, index, and analyze errors in log aggregation tools like CloudWatch, Datadog, or ELK Stack.
+
+**Debugging Efficiency**: Full error context is logged internally while users receive safe, actionable messages.
+
+### Architecture Overview
+
+The error handling system consists of three integrated components:
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                     API Route Handlers                    │
+└────────────────────┬─────────────────────────────────────┘
+                     │ uses
+                     ▼
+┌──────────────────────────────────────────────────────────┐
+│         Error Handler (lib/errorHandler.ts)               │
+│  - Custom error classes                                   │
+│  - Error classification                                   │
+│  - Centralized error handling logic                       │
+└────────────────┬──────────────────────────┬───────────────┘
+                 │                          │
+         uses    ▼                          ▼ uses
+   ┌──────────────────────────┐  ┌──────────────────────────┐
+   │ Logger (lib/logger.ts)   │  │ Response Handler         │
+   │ - Structured logging     │  │ (lib/responseHandler.ts) │
+   │ - Production redaction   │  │ - Unified responses      │
+   └──────────────────────────┘  └──────────────────────────┘
+```
+
+### Components
+
+#### 1. **Structured Logger** (`lib/logger.ts`)
+
+The logger provides environment-aware logging with automatic sensitive data redaction.
+
+```typescript
+import { logger } from "@/lib/logger";
+
+// Basic logging
+logger.info("User created successfully", { userId: user.id });
+logger.error("Database connection failed", {
+  stack: error.stack,
+  duration: 1250,
+});
+
+// Logging with context
+const contextLogger = logger.withContext({
+  requestId: "req-123",
+  userId: user.id,
+  endpoint: "/api/users",
+});
+
+contextLogger.error("Operation failed");
+
+// Performance monitoring
+logger.perf("GET /api/users", 150, true, { userCount: 42 });
+```
+
+**Key Features:**
+
+- **JSON Output**: Structured format compatible with log aggregation tools
+- **Production Redaction**: Sensitive fields (passwords, tokens) automatically redacted
+- **Context Tracking**: Track operations with request context
+- **Performance Metrics**: Built-in performance logging with duration tracking
+- **Environment-Aware**: Different behavior for development vs production
+
+#### 2. **Error Handler** (`lib/errorHandler.ts`)
+
+Custom error classes and centralized error handling for type-safe error management.
+
+```typescript
+import {
+  handleError,
+  handleSuccess,
+  ValidationError,
+  DatabaseError,
+  AuthenticationError,
+  AuthorizationError,
+  NotFoundError,
+  BusinessError,
+} from "@/lib/errorHandler";
+
+// Throw custom errors
+if (!userId) {
+  throw new ValidationError("User ID is required", {
+    field: "userId",
+    received: userId,
+  });
+}
+
+// Handle errors in routes
+export async function GET(request: Request) {
+  try {
+    const users = await prisma.user.findMany();
+    return handleSuccess(users, "Users fetched successfully");
+  } catch (error) {
+    return handleError(error, {
+      endpoint: "/api/users",
+      method: "GET",
+    });
+  }
+}
+```
+
+**Custom Error Classes:**
+
+- `ValidationError` - Input validation failures (400)
+- `DatabaseError` - Database operation failures (500)
+- `AuthenticationError` - Auth failures (401)
+- `AuthorizationError` - Permission failures (403)
+- `NotFoundError` - Missing resources (404)
+- `BusinessError` - Business rule violations (400)
+
+#### 3. **Using Async Error Handler Wrapper**
+
+For automatic error handling in all async operations:
+
+```typescript
+import { withErrorHandler } from "@/lib/errorHandler";
+
+export const GET = withErrorHandler(
+  async (req: Request) => {
+    const users = await prisma.user.findMany();
+    return handleSuccess(users, "Users fetched");
+  },
+  { userId: "user-123" } // optional context
+);
+```
+
+### Error Response Behavior
+
+#### Development Environment
+
+```bash
+NODE_ENV=development npm run dev
+```
+
+**Response includes:**
+
+- Full error message
+- Stack trace for debugging
+- Request context and metadata
+- Error code and category
+
+```json
+{
+  "success": false,
+  "message": "Donor profile already exists for this user",
+  "error": {
+    "code": "E202",
+    "details": {
+      "message": "Donor profile already exists for this user",
+      "details": null,
+      "stack": "Error: Unique constraint failed...\n at..."
+    }
+  },
+  "timestamp": "2026-02-13T10:45:30.000Z"
+}
+```
+
+**Console Log:**
+
+```json
+{
+  "timestamp": "2026-02-13T10:45:30.000Z",
+  "level": "error",
+  "message": "Error in /api/donors",
+  "environment": "development",
+  "context": {
+    "endpoint": "/api/donors",
+    "method": "POST"
+  },
+  "errorCode": "E202",
+  "category": "RESOURCE",
+  "statusCode": 409,
+  "details": "P2002: Unique constraint violation"
+}
+```
+
+#### Production Environment
+
+```bash
+NODE_ENV=production npm run build && npm start
+```
+
+**Response includes:**
+
+- User-friendly message (no technical details)
+- Error code for support reference
+- Timestamp for tracing
+
+```json
+{
+  "success": false,
+  "message": "This resource already exists.",
+  "error": {
+    "code": "E202"
+  },
+  "timestamp": "2026-02-13T10:45:30.000Z"
+}
+```
+
+**Server-Side Log (with full details):**
+
+```json
+{
+  "timestamp": "2026-02-13T10:45:30.000Z",
+  "level": "error",
+  "message": "Error in /api/donors",
+  "environment": "production",
+  "context": {
+    "endpoint": "/api/donors",
+    "method": "POST"
+  },
+  "errorCode": "E202",
+  "category": "RESOURCE",
+  "statusCode": 409,
+  "stack": "[REDACTED]"
+}
+```
+
+### Implementation Examples
+
+#### Example 1: Updated `/api/users/route.ts`
+
+```typescript
+import { prisma } from "@/lib/prisma";
+import {
+  handleError,
+  handleSuccess,
+  ValidationError,
+} from "@/lib/errorHandler";
+import { logger } from "@/lib/logger";
+
+export async function GET(request: Request) {
+  const startTime = Date.now();
+  const context = {
+    endpoint: "/api/users",
+    method: "GET",
+  };
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, Number(searchParams.get("page")) || 1);
+    const limit = Math.max(
+      1,
+      Math.min(100, Number(searchParams.get("limit")) || 10)
+    );
+
+    if (isNaN(page) || isNaN(limit)) {
+      throw new ValidationError("Invalid pagination parameters", {
+        page,
+        limit,
+      });
+    }
+
+    const skip = (page - 1) * limit;
+
+    logger.debug("Fetching users", { context, page, limit });
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      prisma.user.count(),
+    ]);
+
+    const duration = Date.now() - startTime;
+    logger.perf("GET /api/users", duration, true, {
+      context,
+      userCount: users.length,
+    });
+
+    return handleSuccess(
+      {
+        users,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+      "Users retrieved successfully",
+      200,
+      context
+    );
+  } catch (error) {
+    return handleError(error, context);
+  }
+}
+```
+
+#### Example 2: Updated `/api/donors/route.ts` (POST)
+
+```typescript
+export async function POST(request: Request) {
+  const startTime = Date.now();
+  const context = {
+    endpoint: "/api/donors",
+    method: "POST",
+  };
+
+  try {
+    const body = await request.json();
+    const { userId, bloodGroup, phone, latitude, longitude } = body;
+
+    // Validate required fields
+    if (!userId || !bloodGroup) {
+      throw new ValidationError("Missing required fields", {
+        required: ["userId", "bloodGroup"],
+        received: { userId: !!userId, bloodGroup: !!bloodGroup },
+      });
+    }
+
+    logger.debug("Creating donor profile", { context, userId, bloodGroup });
+
+    const donor = await prisma.donorProfile.create({
+      data: {
+        userId,
+        bloodGroup,
+        phone: phone || null,
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    const duration = Date.now() - startTime;
+    logger.perf("POST /api/donors", duration, true, {
+      context,
+      donorId: donor.id,
+    });
+
+    return handleSuccess(
+      donor,
+      "Donor profile created successfully",
+      201,
+      context
+    );
+  } catch (error: any) {
+    return handleError(error, context);
+  }
+}
+```
+
+### Supported Error Types
+
+| Error Type            | HTTP Status | When to Use                 |
+| --------------------- | ----------- | --------------------------- |
+| `ValidationError`     | 400         | Input validation failures   |
+| `DatabaseError`       | 500         | Database operation failures |
+| `AuthenticationError` | 401         | Auth token missing/invalid  |
+| `AuthorizationError`  | 403         | User lacks permissions      |
+| `NotFoundError`       | 404         | Resource doesn't exist      |
+| `BusinessError`       | 400         | Business rule violations    |
+
+### Error Codes Reference
+
+The system uses standardized error codes for easy reference:
+
+**Validation (E001-E003)**
+
+- `E001`: Validation error
+- `E002`: Missing required field
+- `E003`: Invalid format
+
+**Authentication/Authorization (E101-E105)**
+
+- `E101`: Unauthorized
+- `E102`: Forbidden
+- `E103`: Token expired
+- `E104`: Invalid token
+- `E105`: Insufficient permissions
+
+**Resources (E201-E203)**
+
+- `E201`: Not found
+- `E202`: Already exists
+- `E203`: Conflict
+
+**Database (E301-E304)**
+
+- `E301`: Database failure
+- `E302`: Connection error
+- `E303`: Transaction failed
+- `E304`: Query error
+
+**Business (E601-E603)**
+
+- `E601`: Business rule violation
+- `E602`: Invalid operation
+- `E603`: Quota exceeded
+
+### Debugging Efficiency
+
+#### Development: Full Details
+
+Developers see complete error information for rapid debugging.
+
+```bash
+$ curl http://localhost:3000/api/donors -X POST -d '{"bloodGroup":"O+"}'
+
+{
+  "success": false,
+  "message": "Missing required fields",
+  "error": {
+    "code": "E002",
+    "details": {
+      "message": "Missing required fields",
+      "details": {
+        "required": ["userId", "bloodGroup"],
+        "received": {
+          "userId": false,
+          "bloodGroup": true
+        }
+      },
+      "stack": "Error: Missing required fields\n    at POST (/app/src/app/api/donors/route.ts:25:11)"
+    }
+  },
+  "timestamp": "2026-02-13T10:47:00.000Z"
+}
+```
+
+#### Production: Safe Messages
+
+Users see helpful but generic messages; full details logged server-side.
+
+```bash
+$ curl https://api.medipole.com/api/donors -X POST -d '{"bloodGroup":"O+"}'
+
+{
+  "success": false,
+  "message": "Invalid request. Please check your input.",
+  "error": {
+    "code": "E002"
+  },
+  "timestamp": "2026-02-13T10:47:00.000Z"
+}
+```
+
+Server logs have full context for support team investigation.
+
+### Why This Approach Builds User Trust
+
+1. **Security**: Stack traces never reach users, preventing attackers from learning system internals
+2. **Professionalism**: Safe, grammatically correct error messages
+3. **Support**: Error codes allow users to reference issues with support team
+4. **Transparency**: Timestamps prove you're logging everything for investigation
+
+### Best Practices
+
+1. **Always use custom error classes** for domain-specific errors
+2. **Include context** in error logs: endpoint, method, user ID
+3. **Test error paths** - not just happy paths
+4. **Monitor error logs** - set alerts for unusual patterns
+5. **Document error codes** - team should know what each means
+6. **Avoid logging sensitive data** - passwords, tokens, credit cards
+7. **Use appropriate HTTP status codes** - not everything is 500
+8. **Provide actionable messages** - tell users how to fix the problem
+
+### Testing Error Scenarios
+
+Test both success and failure paths:
+
+```bash
+# Valid request
+curl -X GET "http://localhost:3000/api/users?page=1&limit=10"
+
+# Invalid pagination
+curl -X GET "http://localhost:3000/api/users?page=-1&limit=abc"
+
+# Missing required field
+curl -X POST http://localhost:3000/api/donors \
+  -H "Content-Type: application/json" \
+  -d '{"bloodGroup":"O+"}'
+
+# Database constraint violation
+curl -X POST http://localhost:3000/api/donors \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"123","bloodGroup":"O+"}' # if already exists
+```
+
+This comprehensive error handling system ensures that Medipole remains reliable, secure, and maintainable while providing an excellent experience for both developers and end users.
+
 ## Screenshot of Local App Running
 
 ![Medipole App Screenshot](./public/FolderImg.png)
@@ -648,19 +1170,18 @@ This global response handler ensures that every API endpoint speaks the same "la
 
 ### GET
 
->Role	Access
+> Role Access
 >
->ADMIN	All hospitals (with pagination + filter)
+> ADMIN All hospitals (with pagination + filter)
 >
->HOSPITAL	Only their own hospital
+> HOSPITAL Only their own hospital
 >
->Others	403 Forbidden
+> Others 403 Forbidden
 
 ### POST
 
->Role	Access
+> Role Access
 >
->ADMIN	Can create hospital profile
+> ADMIN Can create hospital profile
 >
->Others	403 Forbidden
-
+> Others 403 Forbidden
