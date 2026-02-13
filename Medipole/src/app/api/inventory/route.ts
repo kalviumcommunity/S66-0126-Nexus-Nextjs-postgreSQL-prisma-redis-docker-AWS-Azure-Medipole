@@ -1,95 +1,156 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { prisma } from "@/lib/prisma";
+import {
+  handleError,
+  handleSuccess,
+  ValidationError,
+} from "@/lib/errorHandler";
+import { logger } from "@/lib/logger";
 
 // GET /api/inventory - Get all inventory with optional filters
 export async function GET(request: Request) {
-    try {
-        const { searchParams } = new URL(request.url);
-        const hospitalId = searchParams.get('hospitalId');
-        const bloodGroup = searchParams.get('bloodGroup');
-        const page = Number(searchParams.get('page')) || 1;
-        const limit = Number(searchParams.get('limit')) || 10;
-        const skip = (page - 1) * limit;
+  const startTime = Date.now();
+  const context = {
+    endpoint: "/api/inventory",
+    method: "GET",
+  };
 
-        const where: any = {};
-        if (hospitalId) where.hospitalId = hospitalId;
-        if (bloodGroup) where.bloodGroup = bloodGroup;
+  try {
+    const { searchParams } = new URL(request.url);
+    const hospitalId = searchParams.get("hospitalId")?.trim();
+    const bloodGroup = searchParams.get("bloodGroup")?.trim();
+    const page = Math.max(1, Number(searchParams.get("page")) || 1);
+    const limit = Math.max(
+      1,
+      Math.min(100, Number(searchParams.get("limit")) || 10)
+    );
+    const skip = (page - 1) * limit;
 
-        const [inventory, total] = await Promise.all([
-            prisma.inventory.findMany({
-                where,
-                skip,
-                take: limit,
-                include: {
-                    hospital: {
-                        select: {
-                            name: true,
-                            address: true,
-                        },
-                    },
-                },
-            }),
-            prisma.inventory.count({ where }),
-        ]);
-
-        return NextResponse.json({
-            data: inventory,
-            pagination: {
-                page,
-                limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-            },
-        });
-    } catch (error) {
-        console.error('Error fetching inventory:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch inventory' },
-            { status: 500 }
-        );
+    if (isNaN(page) || isNaN(limit)) {
+      throw new ValidationError("Invalid pagination parameters", {
+        page,
+        limit,
+      });
     }
+
+    const where: any = {};
+    if (hospitalId) where.hospitalId = hospitalId;
+    if (bloodGroup) where.bloodGroup = bloodGroup;
+
+    logger.debug("Fetching inventory", {
+      context,
+      filters: { hospitalId, bloodGroup },
+      page,
+      limit,
+    });
+
+    const [inventory, total] = await Promise.all([
+      prisma.inventory.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          hospital: {
+            select: {
+              name: true,
+              address: true,
+            },
+          },
+        },
+      }),
+      prisma.inventory.count({ where }),
+    ]);
+
+    const duration = Date.now() - startTime;
+    logger.perf("GET /api/inventory", duration, true, {
+      context,
+      itemCount: inventory.length,
+    });
+
+    return handleSuccess(
+      {
+        inventory,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+      "Inventory retrieved successfully",
+      200,
+      context
+    );
+  } catch (error) {
+    return handleError(error, context);
+  }
 }
 
 // POST /api/inventory - Add inventory entry
 export async function POST(request: Request) {
-    try {
-        const body = await request.json();
-        const { hospitalId, bloodGroup, units } = body;
+  const startTime = Date.now();
+  const context = {
+    endpoint: "/api/inventory",
+    method: "POST",
+  };
 
-        if (!hospitalId || !bloodGroup || units === undefined) {
-            return NextResponse.json(
-                { error: 'hospitalId, bloodGroup, and units are required' },
-                { status: 400 }
-            );
-        }
+  try {
+    const body = await request.json();
+    const { hospitalId, bloodGroup, units } = body;
 
-        const inventory = await prisma.inventory.create({
-            data: {
-                hospitalId,
-                bloodGroup,
-                units,
-            },
-            include: {
-                hospital: {
-                    select: {
-                        name: true,
-                    },
-                },
-            },
-        });
-
-        return NextResponse.json(inventory, { status: 201 });
-    } catch (error: any) {
-        if (error.code === 'P2002') {
-            return NextResponse.json(
-                { error: 'Inventory entry already exists for this hospital and blood group' },
-                { status: 409 }
-            );
-        }
-        console.error('Error creating inventory:', error);
-        return NextResponse.json(
-            { error: 'Failed to create inventory entry' },
-            { status: 500 }
-        );
+    // Validate required fields
+    if (!hospitalId || !bloodGroup || units === undefined) {
+      throw new ValidationError("Missing required fields", {
+        required: ["hospitalId", "bloodGroup", "units"],
+        received: {
+          hospitalId: !!hospitalId,
+          bloodGroup: !!bloodGroup,
+          units: units !== undefined,
+        },
+      });
     }
+
+    // Validate units is a positive number
+    if (typeof units !== "number" || units < 0) {
+      throw new ValidationError("Units must be a non-negative number", {
+        received: units,
+      });
+    }
+
+    logger.debug("Creating inventory entry", {
+      context,
+      hospitalId,
+      bloodGroup,
+      units,
+    });
+
+    const inventory = await prisma.inventory.create({
+      data: {
+        hospitalId,
+        bloodGroup,
+        units,
+      },
+      include: {
+        hospital: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    const duration = Date.now() - startTime;
+    logger.perf("POST /api/inventory", duration, true, {
+      context,
+      inventoryId: inventory.id,
+    });
+
+    return handleSuccess(
+      inventory,
+      "Inventory entry created successfully",
+      201,
+      context
+    );
+  } catch (error) {
+    return handleError(error, context);
+  }
 }

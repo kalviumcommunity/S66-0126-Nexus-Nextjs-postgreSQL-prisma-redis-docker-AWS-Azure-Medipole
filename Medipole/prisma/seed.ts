@@ -1,41 +1,41 @@
-import 'dotenv/config'
-import { Pool } from 'pg'
-import { PrismaPg } from '@prisma/adapter-pg'
-import { hash } from 'bcrypt'
+import "dotenv/config";
+import { Pool } from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { hash } from "bcrypt";
 
-import * as PrismaPkg from '@prisma/client'
-const { PrismaClient } = PrismaPkg as any
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-const adapter = new PrismaPg(pool)
-const prisma = new PrismaClient({ adapter })
+import * as PrismaPkg from "@prisma/client";
+const { PrismaClient } = PrismaPkg as any;
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const hashedPassword = await hash('password123', 10)
+  const hashedPassword = await hash("password123", 10);
 
   // Create Admin
-  const { UserRole, BloodGroup, RequestStatus } = PrismaPkg as any
+  const { UserRole, BloodGroup, RequestStatus } = PrismaPkg as any;
   await prisma.user.upsert({
-    where: { email: 'admin@medipole.com' },
+    where: { email: "admin@medipole.com" },
     update: {},
     create: {
-      email: 'admin@medipole.com',
+      email: "admin@medipole.com",
       password: hashedPassword,
       role: UserRole.ADMIN,
     },
-  })
+  });
 
   // Create Hospital
   const hospitalUser = await prisma.user.upsert({
-    where: { email: 'cityhospital@example.com' },
+    where: { email: "cityhospital@example.com" },
     update: {},
     create: {
-      email: 'cityhospital@example.com',
+      email: "cityhospital@example.com",
       password: hashedPassword,
       role: UserRole.HOSPITAL,
       hospitalProfile: {
         create: {
-          name: 'City General Hospital',
-          address: '123 Health St, Metro City',
+          name: "City General Hospital",
+          address: "123 Health St, Metro City",
           latitude: 12.9716,
           longitude: 77.5946,
           isVerified: true,
@@ -49,30 +49,30 @@ async function main() {
         },
       },
     },
-  })
+  });
 
   const hospitalProfile = await prisma.hospitalProfile.findUnique({
     where: { userId: hospitalUser.id },
-  })
+  });
 
   // Create Donor
   await prisma.user.upsert({
-    where: { email: 'johndoe@example.com' },
+    where: { email: "johndoe@example.com" },
     update: {},
     create: {
-      email: 'johndoe@example.com',
+      email: "johndoe@example.com",
       password: hashedPassword,
       role: UserRole.DONOR,
       donorProfile: {
         create: {
           bloodGroup: BloodGroup.A_POSITIVE,
-          phone: '+919876543210',
+          phone: "+919876543210",
           latitude: 12.9816,
           longitude: 77.6046,
         },
       },
     },
-  })
+  });
 
   if (hospitalProfile) {
     // Create an emergency request
@@ -82,19 +82,19 @@ async function main() {
         bloodGroup: BloodGroup.O_NEGATIVE,
         unitsRequired: 2,
         status: RequestStatus.PENDING,
-        details: 'Urgent requirement for surgery.',
+        details: "Urgent requirement for surgery.",
       },
-    })
+    });
   }
 
-  console.log('Database seeded successfully!')
+  console.log("Database seeded successfully!");
 }
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });
