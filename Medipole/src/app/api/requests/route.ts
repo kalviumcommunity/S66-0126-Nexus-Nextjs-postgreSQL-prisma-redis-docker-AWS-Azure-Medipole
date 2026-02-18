@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const where = status ? { status } : {};
+    const where = status ? { status: status as any } : {};
 
     logger.debug("Fetching blood requests", {
       context,
