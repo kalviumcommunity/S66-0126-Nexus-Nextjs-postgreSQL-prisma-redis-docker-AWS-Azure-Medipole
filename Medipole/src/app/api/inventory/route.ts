@@ -116,15 +116,24 @@ export async function POST(request: Request) {
       });
     }
 
-    logger.debug("Creating inventory entry", {
+    logger.debug("Creating/updating inventory entry", {
       context,
       hospitalId,
       bloodGroup,
       units,
     });
 
-    const inventory = await prisma.inventory.create({
-      data: {
+    const inventory = await prisma.inventory.upsert({
+      where: {
+        hospitalId_bloodGroup: {
+          hospitalId,
+          bloodGroup,
+        },
+      },
+      update: {
+        units: { increment: units },
+      },
+      create: {
         hospitalId,
         bloodGroup,
         units,

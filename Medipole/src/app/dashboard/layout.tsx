@@ -16,20 +16,68 @@ import {
   Menu,
   X,
   Bell,
+  Building2,
+  HeartHandshake,
+  Package,
+  Users,
+  Activity,
 } from "lucide-react";
 import { useUserStore } from "@/store/userStore";
 
-const sidebarItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  {
-    icon: AlertTriangle,
-    label: "Emergency Requests",
-    href: "/dashboard/emergency",
-  },
-  { icon: Clock, label: "Donation History", href: "/dashboard/history" },
-  { icon: ShieldCheck, label: "Eligibility", href: "/dashboard/eligibility" },
-  { icon: MapPin, label: "Nearby Map", href: "/dashboard/nearby" },
-];
+const getSidebarItems = (role: string) => {
+  const commonItems = [
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+  ];
+
+  const roleSpecificItems: Record<string, typeof commonItems> = {
+    DONOR: [
+      {
+        icon: AlertTriangle,
+        label: "Emergency Requests",
+        href: "/dashboard/emergency",
+      },
+      { icon: Clock, label: "Donation History", href: "/dashboard/history" },
+      {
+        icon: ShieldCheck,
+        label: "Eligibility",
+        href: "/dashboard/eligibility",
+      },
+      { icon: MapPin, label: "Nearby Map", href: "/dashboard/nearby" },
+    ],
+    HOSPITAL: [
+      { icon: Package, label: "Inventory", href: "/dashboard/inventory" },
+      {
+        icon: AlertTriangle,
+        label: "Blood Requests",
+        href: "/dashboard/requests",
+      },
+      { icon: Users, label: "Donors", href: "/dashboard/donors" },
+    ],
+    NGO: [
+      {
+        icon: HeartHandshake,
+        label: "Campaigns",
+        href: "/dashboard/campaigns",
+      },
+      { icon: Activity, label: "Analytics", href: "/dashboard/analytics" },
+      {
+        icon: ShieldCheck,
+        label: "Verify Hospitals",
+        href: "/dashboard/verify",
+      },
+    ],
+    ADMIN: [
+      { icon: Users, label: "Users", href: "/dashboard/users" },
+      { icon: Building2, label: "Hospitals", href: "/dashboard/hospitals" },
+      { icon: Activity, label: "Analytics", href: "/dashboard/analytics" },
+    ],
+  };
+
+  return [
+    ...commonItems,
+    ...(roleSpecificItems[role] || roleSpecificItems.DONOR),
+  ];
+};
 
 export default function DashboardLayout({
   children,
@@ -40,7 +88,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useUserStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(() => false);
 
   useEffect(() => {
     setMounted(true);
@@ -51,6 +99,8 @@ export default function DashboardLayout({
       router.push("/auth/login");
     }
   }, [mounted, isAuthenticated, router]);
+
+  const sidebarItems = getSidebarItems(user?.role || "DONOR");
 
   if (!mounted || !isAuthenticated) {
     return (
@@ -109,7 +159,7 @@ export default function DashboardLayout({
               background: "rgba(0,0,0,0.4)",
               zIndex: 40,
             }}
-            className="lg:!hidden"
+            className="lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
@@ -130,7 +180,7 @@ export default function DashboardLayout({
           zIndex: 50,
           transition: "transform 0.3s ease",
         }}
-        className={`lg:!translate-x-0 ${!sidebarOpen ? "max-lg:-translate-x-full" : ""}`}
+        className={`lg:translate-x-0 ${!sidebarOpen ? "max-lg:-translate-x-full" : ""}`}
       >
         {/* Logo */}
         <div
@@ -166,7 +216,7 @@ export default function DashboardLayout({
           </span>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:!hidden"
+            className="lg:hidden"
             style={{
               marginLeft: "auto",
               color: "white",
@@ -374,7 +424,7 @@ export default function DashboardLayout({
           minWidth: 0,
           marginLeft: 240,
         }}
-        className="max-lg:!ml-0"
+        className="max-lg:ml-0!"
       >
         {/* Top bar */}
         <header

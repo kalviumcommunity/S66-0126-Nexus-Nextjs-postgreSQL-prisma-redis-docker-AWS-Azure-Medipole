@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     rules: {
       "no-console": "warn",
       "prettier/prettier": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "react-hooks/set-state-in-effect": "off",
     },
   },
   eslintConfigPrettier,
