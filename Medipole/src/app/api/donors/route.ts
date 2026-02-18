@@ -33,7 +33,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const where = bloodGroup ? { bloodGroup } : {};
+    const where = bloodGroup ? { bloodGroup: bloodGroup as any } : {};
 
     logger.debug("Fetching donors", {
       context,
