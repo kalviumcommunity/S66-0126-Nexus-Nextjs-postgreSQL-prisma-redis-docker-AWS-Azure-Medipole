@@ -9,6 +9,85 @@ import {
 import { logger } from "@/lib/logger";
 
 // GET /api/donors - List all donors with optional blood group filter
+/**
+ * @swagger
+ * /api/donors:
+ *   get:
+ *     summary: Retrieve a paginated list of donors
+ *     description: Get all donor profiles with optional blood group filtering and pagination.
+ *     tags: [Donors]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 10
+ *         description: Number of donors per page
+ *       - in: query
+ *         name: bloodGroup
+ *         schema:
+ *           type: string
+ *           enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+ *         description: Filter donors by blood group
+ *     responses:
+ *       200:
+ *         description: Donors retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 donors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       bloodGroup:
+ *                         type: string
+ *                       phone:
+ *                         type: string
+ *                       latitude:
+ *                         type: number
+ *                       longitude:
+ *                         type: number
+ *                       user:
+ *                         type: object
+ *                         properties:
+ *                           email:
+ *                             type: string
+ *                           role:
+ *                             type: string
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
+ *       400:
+ *         description: Invalid parameters
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export async function GET(request: Request) {
   const startTime = Date.now();
   const context = {
@@ -88,6 +167,72 @@ export async function GET(request: Request) {
 }
 
 // POST /api/donors - Create a new donor profile
+/**
+ * @swagger
+ * /api/donors:
+ *   post:
+ *     summary: Create a new donor profile
+ *     description: Create a donor profile for an existing user with blood group and location information.
+ *     tags: [Donors]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - bloodGroup
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: ID of the user to create donor profile for
+ *               bloodGroup:
+ *                 type: string
+ *                 enum: [A+, A-, B+, B-, AB+, AB-, O+, O-]
+ *               phone:
+ *                 type: string
+ *                 description: Contact phone number
+ *               latitude:
+ *                 type: number
+ *                 description: Geographic latitude
+ *               longitude:
+ *                 type: number
+ *                 description: Geographic longitude
+ *     responses:
+ *       201:
+ *         description: Donor profile created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 bloodGroup:
+ *                   type: string
+ *                 phone:
+ *                   type: string
+ *                 latitude:
+ *                   type: number
+ *                 longitude:
+ *                   type: number
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *       400:
+ *         description: Invalid input data
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export async function POST(request: Request) {
   const startTime = Date.now();
   const context = {

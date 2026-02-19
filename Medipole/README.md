@@ -1536,6 +1536,49 @@ Navigate to the repository's Actions tab to view pipeline runs, logs, and covera
 
 ---
 
+## API Documentation
+
+### Swagger/OpenAPI Documentation
+Interactive API documentation is available via Swagger UI:
+
+- **URL**: `http://localhost:3000/api/docs` (development) or `https://your-domain.com/api/docs` (production)
+- **Version**: 1.0.0
+- **Last Updated**: February 2026
+- **Authentication**: Bearer Token (JWT)
+
+### Key Endpoints Documented
+- **Users**: `/api/users` - User management with pagination
+- **Donors**: `/api/donors` - Donor profiles with blood group filtering
+- **Hospitals**: `/api/hospitals` - Hospital management
+- **Inventory**: `/api/inventory` - Blood inventory tracking
+- **Requests**: `/api/requests` - Emergency blood requests
+
+### Error Response Format
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid input data",
+    "details": {...}
+  },
+  "context": {
+    "endpoint": "/api/users",
+    "method": "POST",
+    "timestamp": "2026-02-19T..."
+  }
+}
+```
+
+### Architecture Documentation
+For detailed system architecture, see [ARCHITECTURE.md](./ARCHITECTURE.md)
+
+### Reflections on Documentation
+- **Maintenance Process**: API documentation is kept current through JSDoc comments in code and automated Swagger generation. Updates are required for all PRs adding new endpoints.
+- **Onboarding Benefits**: New developers can quickly understand the API structure and test endpoints locally, reducing ramp-up time from weeks to days.
+- **Future Plans**: Implement automated documentation deployment to production, add more comprehensive examples, and create video tutorials for complex workflows.
+
+---
+
 ## Hospital
 
 ### GET
