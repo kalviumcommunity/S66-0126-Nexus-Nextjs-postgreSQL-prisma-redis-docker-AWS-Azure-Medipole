@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-hot-toast";
 import FormInput from "@/components/FormInput";
 
 // 1. Define validation schema
@@ -25,10 +26,23 @@ export default function SignupPage() {
     resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit = (data: SignupFormData) => {
-    console.log("Form Submitted:", data);
-    alert(`Welcome, ${data.name}! Your account has been created.`);
-    reset();
+  const onSubmit = async (data: SignupFormData) => {
+    const toastId = toast.loading("Creating your account...");
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      console.log("Form Submitted:", data);
+      toast.success("Welcome! Your account has been created successfully.", {
+        id: toastId,
+      });
+      reset();
+    } catch (error) {
+      toast.error("Something went wrong! Please try again.", {
+        id: toastId,
+      });
+    }
   };
 
   return (
