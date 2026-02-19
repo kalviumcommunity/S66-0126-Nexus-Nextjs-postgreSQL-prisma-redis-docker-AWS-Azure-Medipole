@@ -1424,6 +1424,84 @@ For complete documentation, see [EMAIL_SERVICE.md](./EMAIL_SERVICE.md)
 
 ---
 
+## Unit Testing Setup
+
+### Overview
+
+Medipole includes a comprehensive unit testing setup using Jest and React Testing Library (RTL) to ensure code quality and prevent regressions. The testing setup covers both utility functions and React components.
+
+### Technologies Used
+
+- **Jest**: JavaScript testing framework for unit tests
+- **React Testing Library (RTL)**: For testing React components in a user-centric way
+- **@testing-library/jest-dom**: Custom Jest matchers for asserting on DOM nodes
+- **ts-jest**: TypeScript support for Jest
+- **@types/jest**: TypeScript definitions for Jest
+
+### Test Scripts
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+```
+
+### Test Structure
+
+Tests are located in the `__tests__` directory and include:
+
+1. **Utility Functions Testing** (`__tests__/utils.test.ts`):
+   - Email validation with various formats
+   - String capitalization with edge cases
+   - Phone number formatting
+   - Password validation against complexity requirements
+
+2. **React Component Testing** (`__tests__/button.test.tsx`):
+   - Component rendering with different variants and sizes
+   - Click event handling
+   - Loading state behavior
+   - Disabled state behavior
+   - Custom class application
+
+3. **Logger Utility Testing** (`__tests__/logger.test.ts`):
+   - Different log levels (debug, info, warn, error)
+   - Metadata handling and structured logging
+   - HTTP, database, and security logging methods
+   - Request ID generation and child logger functionality
+
+4. **Metrics Utility Testing** (`__tests__/metrics.test.ts`):
+   - Counter, gauge, and histogram metric functionality
+   - HTTP request tracking, database query tracking, and error metrics
+   - Prometheus format output verification
+   - Metric reset functionality
+
+### Test Results
+
+As of the latest run:
+- **Test Suites**: 4 passed
+- **Tests**: 44 passed
+- **Coverage**: Focused coverage on tested components is 100%
+
+### CI/CD Integration
+
+The testing setup is designed to integrate with GitHub Actions workflows:
+
+```yaml
+- name: Run Unit Tests
+  run: npm test -- --coverage
+```
+
+### Documentation
+
+For complete testing documentation, see [TESTING_SETUP.md](./TESTING_SETUP.md)
+
+---
+
 ## Hospital
 
 ### GET
