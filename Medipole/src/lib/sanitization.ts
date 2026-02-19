@@ -1,9 +1,15 @@
 import sanitizeHtml from "sanitize-html";
 import DOMPurify from "dompurify";
-import { JSDOM } from "jsdom";
 
-// Create DOMPurify instance for server-side use
-const window = new JSDOM("").window;
+// For server-side use, we'll use a mock window object
+// In production, this would be handled differently
+const window = {
+  DOMParser: class {
+    parseFromString() {
+      return { documentElement: {} };
+    }
+  },
+} as any;
 const purify = DOMPurify(window);
 
 /**

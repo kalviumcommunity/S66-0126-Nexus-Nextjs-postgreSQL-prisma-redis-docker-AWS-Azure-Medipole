@@ -4,7 +4,7 @@ import redis from "@/lib/redis";
 
 const CACHE_TTL = 60;
 
-export async function GET(request: NextRequest, context: any) {
+export async function GET(_request: NextRequest, context: any) {
   try {
     const { params } = context;
     const userId = params.id;
@@ -96,7 +96,7 @@ export async function PATCH(request: NextRequest, context: any) {
   }
 }
 
-export async function DELETE(request: NextRequest, context: any) {
+export async function DELETE(_request: NextRequest, context: any) {
   try {
     const { params } = context;
     const userId = params.id;

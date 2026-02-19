@@ -123,7 +123,7 @@ export async function GET() {
           "All tests passed - XSS and SQL injection prevention working",
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     logSecurityEvent("Security test route error", { error: error.message });
     return NextResponse.json(
       {
@@ -136,7 +136,7 @@ export async function GET() {
   }
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
 
@@ -164,7 +164,7 @@ export async function POST(request) {
       securityStatus:
         sanitizedTest !== testData ? "Protected" : "Potentially Vulnerable",
     });
-  } catch (error) {
+  } catch (error: any) {
     logSecurityEvent("Security test POST error", { error: error.message });
     return NextResponse.json(
       {

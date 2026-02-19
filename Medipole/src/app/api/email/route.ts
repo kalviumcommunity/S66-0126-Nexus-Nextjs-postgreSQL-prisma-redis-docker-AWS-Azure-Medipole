@@ -28,8 +28,6 @@ const emailSchema = z.object({
   text: z.string().optional(),
 });
 
-type EmailRequest = z.infer<typeof emailSchema>;
-
 export async function POST(req: Request) {
   try {
     // Parse and validate request body
@@ -155,12 +153,12 @@ export async function POST(req: Request) {
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      logger.error("Email request validation failed", { errors: error.errors });
+      logger.error("Email request validation failed", { issues: error.issues });
       return NextResponse.json(
         {
           success: false,
           error: "Validation failed",
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       );
