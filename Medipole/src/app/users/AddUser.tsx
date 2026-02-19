@@ -38,7 +38,7 @@ export default function AddUser() {
       );
 
       // Actual API call
-      const response = await postFetcher("/api/mock-users", {
+      await postFetcher("/api/mock-users", {
         name: name.trim(),
         email: email.trim(),
       });
