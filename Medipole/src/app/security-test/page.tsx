@@ -3,9 +3,23 @@
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 
+interface SecurityTestResult {
+  originalInput: string;
+  sanitizedInput: string;
+  xssDetected: boolean;
+  sanitizationResult: string;
+  displaySafe: string;
+  securityStatus: string;
+  sanitizedBody?: {
+    name?: string;
+    email?: string;
+    comment?: string;
+  };
+}
+
 export default function SecurityTestPage() {
   const [testInput, setTestInput] = useState("");
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState<SecurityTestResult | null>(null);
   const [isTesting, setIsTesting] = useState(false);
 
   // Example malicious inputs for testing

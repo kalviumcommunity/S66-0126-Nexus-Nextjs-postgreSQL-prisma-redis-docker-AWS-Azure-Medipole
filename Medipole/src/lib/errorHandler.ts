@@ -15,9 +15,16 @@
  */
 
 import { NextResponse } from "next/server";
-import { logger, LogContext } from "./logger";
+import { logger } from "./logger";
 import { sendError, sendSuccess } from "./responseHandler";
 import { ERROR_CODES, ERROR_CATEGORIES } from "./errorCodes";
+
+// Define LogContext type for error handling
+interface LogContext {
+  endpoint?: string;
+  method?: string;
+  [key: string]: any;
+}
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -229,13 +236,16 @@ export function handleError(error: any, context?: LogContext): NextResponse {
 
   // Log the error with full details
   logger.error(`Error in ${context?.endpoint || "API"}`, {
-    context,
-    stack: error instanceof Error ? error.stack : undefined,
-    errorCode: code,
-    category,
-    statusCode,
-    details: isDevelopment ? details : undefined,
-    isApplicationError: isAppError,
+    metadata: {
+      endpoint: context?.endpoint,
+      method: context?.method,
+      stack: error instanceof Error ? error.stack : undefined,
+      errorCode: code,
+      category,
+      statusCode,
+      details: isDevelopment ? details : undefined,
+      isApplicationError: isAppError,
+    },
   });
 
   // Return standardized error response
@@ -290,17 +300,21 @@ export function withErrorHandler(
       const response = await handler(req);
       const duration = Date.now() - startTime;
 
-      logger.perf(`${req.method} ${pathname}`, duration, true, {
-        context: handlerContext,
-        statusCode: response.status,
+      logger.info(`${req.method} ${pathname} completed`, {
+        metadata: {
+          duration,
+          statusCode: response.status,
+        },
       });
 
       return response;
     } catch (error) {
       const duration = Date.now() - startTime;
 
-      logger.perf(`${req.method} ${pathname}`, duration, false, {
-        context: handlerContext,
+      logger.info(`${req.method} ${pathname} failed`, {
+        metadata: {
+          duration,
+        },
       });
 
       return handleError(error, handlerContext);
@@ -324,8 +338,11 @@ export function handleSuccess(
   context?: LogContext
 ): NextResponse {
   logger.info(`Success response from ${context?.endpoint || "API"}`, {
-    context,
-    statusCode,
+    metadata: {
+      endpoint: context?.endpoint,
+      method: context?.method,
+      statusCode,
+    },
   });
 
   return sendSuccess(data, message, statusCode);

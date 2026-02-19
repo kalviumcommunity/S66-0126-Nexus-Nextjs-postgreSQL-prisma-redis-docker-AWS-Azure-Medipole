@@ -41,15 +41,18 @@ export async function GET(request: Request) {
 
     if (cached) {
       logger.debug("Cache Hit - Users List", {
-        context,
-        page,
-        limit,
+        metadata: {
+          page,
+          limit,
+        },
       });
 
       const duration = Date.now() - startTime;
 
-      logger.perf("GET /api/users (cached)", duration, true, {
-        context,
+      logger.info("GET /api/users (cached) completed", {
+        metadata: {
+          duration,
+        },
       });
 
       return handleSuccess(
@@ -61,10 +64,11 @@ export async function GET(request: Request) {
     }
 
     logger.debug("Cache Miss - Fetching from DB", {
-      context,
-      page,
-      limit,
-      skip,
+      metadata: {
+        page,
+        limit,
+        skip,
+      },
     });
 
     const [users, total] = await Promise.all([
@@ -96,9 +100,11 @@ export async function GET(request: Request) {
 
     const duration = Date.now() - startTime;
 
-    logger.perf("GET /api/users", duration, true, {
-      context,
-      userCount: users.length,
+    logger.info("GET /api/users completed", {
+      metadata: {
+        duration,
+        userCount: users.length,
+      },
     });
 
     return handleSuccess(
@@ -133,8 +139,9 @@ export async function POST(request: Request) {
     }
 
     logger.info("User created & cache invalidated", {
-      context,
-      userId: newUser.id,
+      metadata: {
+        userId: newUser.id,
+      },
     });
 
     return handleSuccess(newUser, "User created successfully", 201, context);

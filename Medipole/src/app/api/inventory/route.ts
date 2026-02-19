@@ -37,10 +37,11 @@ export async function GET(request: Request) {
     if (bloodGroup) where.bloodGroup = bloodGroup;
 
     logger.debug("Fetching inventory", {
-      context,
-      filters: { hospitalId, bloodGroup },
-      page,
-      limit,
+      metadata: {
+        filters: { hospitalId, bloodGroup },
+        page,
+        limit,
+      },
     });
 
     const [inventory, total] = await Promise.all([
@@ -61,9 +62,11 @@ export async function GET(request: Request) {
     ]);
 
     const duration = Date.now() - startTime;
-    logger.perf("GET /api/inventory", duration, true, {
-      context,
-      itemCount: inventory.length,
+    logger.info("GET /api/inventory completed", {
+      metadata: {
+        duration,
+        itemCount: inventory.length,
+      },
     });
 
     return handleSuccess(
@@ -117,10 +120,11 @@ export async function POST(request: Request) {
     }
 
     logger.debug("Creating/updating inventory entry", {
-      context,
-      hospitalId,
-      bloodGroup,
-      units,
+      metadata: {
+        hospitalId,
+        bloodGroup,
+        units,
+      },
     });
 
     const inventory = await prisma.inventory.upsert({
@@ -148,9 +152,11 @@ export async function POST(request: Request) {
     });
 
     const duration = Date.now() - startTime;
-    logger.perf("POST /api/inventory", duration, true, {
-      context,
-      inventoryId: inventory.id,
+    logger.info("POST /api/inventory completed", {
+      metadata: {
+        duration,
+        inventoryId: inventory.id,
+      },
     });
 
     return handleSuccess(
