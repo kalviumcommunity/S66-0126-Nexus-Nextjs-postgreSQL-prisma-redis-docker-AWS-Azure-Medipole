@@ -5,6 +5,34 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   output: "standalone",
 
+  // HTTPS Redirect Configuration
+  async redirects() {
+    return [
+      {
+        source: "/(.*)",
+        has: [
+          {
+            type: "host",
+            value: "http://medipole.com",
+          },
+        ],
+        destination: "https://medipole.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/(.*)",
+        has: [
+          {
+            type: "host",
+            value: "http://www.medipole.com",
+          },
+        ],
+        destination: "https://www.medipole.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
+
   // Security Headers Configuration
   async headers() {
     return [
