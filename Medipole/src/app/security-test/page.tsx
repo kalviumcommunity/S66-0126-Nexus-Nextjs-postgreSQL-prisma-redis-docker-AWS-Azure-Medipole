@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { toast } from "react-hot-toast";
-import { sanitizeInput, sanitizeForDisplay } from "@/lib/sanitization";
 
 export default function SecurityTestPage() {
   const [testInput, setTestInput] = useState("");
@@ -43,14 +42,14 @@ export default function SecurityTestPage() {
       } else {
         toast.error("Security test failed: " + data.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Error running security tests: " + error.message);
     } finally {
       setIsTesting(false);
     }
   };
 
-  const loadTestCase = (testCase) => {
+  const loadTestCase = (testCase: string) => {
     setTestInput(testCase);
   };
 
