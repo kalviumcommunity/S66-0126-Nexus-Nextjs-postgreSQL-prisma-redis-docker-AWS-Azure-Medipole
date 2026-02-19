@@ -146,6 +146,7 @@ Tier: Burstable B1ms
    - RDS Console → Your database → Security group link
 
 2. **Edit Inbound Rules**
+
    ```
    Type: PostgreSQL
    Protocol: TCP
@@ -155,6 +156,7 @@ Tier: Burstable B1ms
    ```
 
 3. **For Production App Server**
+
    ```
    Type: PostgreSQL
    Protocol: TCP
@@ -184,6 +186,7 @@ Tier: Burstable B1ms
 ### Finding Your IP Address
 
 Visit [https://whatismyipaddress.com](https://whatismyipaddress.com) or run:
+
 ```bash
 curl ifconfig.me
 ```
@@ -205,6 +208,7 @@ DATABASE_URL="postgresql://medipole_admin:YourSecurePassword123!@medipole-postgr
 ```
 
 **Connection String Format:**
+
 ```
 postgresql://[USER]:[PASSWORD]@[HOST]:[PORT]/[DATABASE]?sslmode=require
 ```
@@ -214,6 +218,7 @@ postgresql://[USER]:[PASSWORD]@[HOST]:[PORT]/[DATABASE]?sslmode=require
 Both AWS and Azure require SSL connections. The `?sslmode=require` parameter ensures encrypted connections.
 
 For stricter validation:
+
 ```env
 DATABASE_URL="postgresql://...?sslmode=verify-full&sslrootcert=/path/to/ca-certificate.crt"
 ```
@@ -227,6 +232,7 @@ curl http://localhost:3000/api/db-health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "success",
@@ -303,26 +309,31 @@ SHOW ssl;
 ### AWS RDS Automated Backups
 
 **Configuration (already set during creation):**
+
 - Backup retention: 7 days
 - Backup window: Preferred (or let AWS choose)
 - Multi-AZ: Disabled for free tier
 
 **Manual Snapshot:**
+
 1. RDS Console → Databases → Select instance
 2. Actions → Take snapshot
 3. Name: `medipole-manual-backup-2026-02-19`
 
 **Restore from Snapshot:**
+
 1. RDS Console → Snapshots
 2. Select snapshot → Actions → Restore snapshot
 
 ### Azure Automated Backups
 
 **Configuration (already set during creation):**
+
 - Backup retention: 7 days
 - Geo-redundant: Disabled
 
 **Point-in-Time Restore:**
+
 1. Azure Portal → PostgreSQL server
 2. Overview → Restore
 3. Select restore point → Create new server
@@ -339,11 +350,11 @@ SHOW ssl;
 
 ### AWS RDS (Free Tier - 12 months)
 
-| Resource | Free Tier Allowance |
-|----------|-------------------|
-| db.t3.micro | 750 hours/month |
-| Storage | 20 GB SSD |
-| Backups | 20 GB included |
+| Resource      | Free Tier Allowance |
+| ------------- | ------------------- |
+| db.t3.micro   | 750 hours/month     |
+| Storage       | 20 GB SSD           |
+| Backups       | 20 GB included      |
 | Data transfer | 1 GB/month outbound |
 
 **After Free Tier (us-east-1):**
@@ -356,12 +367,12 @@ SHOW ssl;
 
 ### Azure (Pay-as-you-go)
 
-| Resource | Monthly Cost |
-|----------|-------------|
-| Burstable B1ms (1 vCore, 2GB RAM) | ~$12-15 |
-| 32 GB storage | ~$4.60 |
-| Backups (7 days) | Included |
-| **Total** | **~$17-20/month** |
+| Resource                          | Monthly Cost      |
+| --------------------------------- | ----------------- |
+| Burstable B1ms (1 vCore, 2GB RAM) | ~$12-15           |
+| 32 GB storage                     | ~$4.60            |
+| Backups (7 days)                  | Included          |
+| **Total**                         | **~$17-20/month** |
 
 ### Cost Optimization Tips
 
@@ -377,11 +388,13 @@ SHOW ssl;
 ### Scaling Strategies
 
 **Vertical Scaling (Scale Up):**
+
 - Change instance class (e.g., db.t3.micro → db.t3.small → db.t3.medium)
 - Minimal downtime with Multi-AZ
 - Good for: Increasing CPU/memory
 
 **Horizontal Scaling (Read Replicas):**
+
 - Create read replicas for read-heavy workloads
 - Route SELECT queries to replicas
 - Good for: Analytics, reporting, high read traffic
@@ -397,11 +410,13 @@ Primary DB (writes)
 ### High Availability
 
 **AWS Multi-AZ Deployment:**
+
 - Synchronous replication to standby in different AZ
 - Automatic failover (60-120 seconds)
 - ~2x the cost
 
 **Azure Zone-Redundant HA:**
+
 - Standby replica in different availability zone
 - Automatic failover
 - Add ~$50-100/month
@@ -418,6 +433,7 @@ Primary DB (writes)
    - In-transit: Enforce SSL connections
 
 3. **Use IAM authentication (AWS)**
+
    ```env
    DATABASE_URL="postgresql://iam_user:@endpoint:5432/db?sslmode=require"
    ```
@@ -433,6 +449,7 @@ Primary DB (writes)
 ### Monitoring
 
 **Key Metrics to Monitor:**
+
 - CPU Utilization (alert > 80%)
 - Freeable Memory (alert < 100MB)
 - Database Connections (alert > 80% of max)
@@ -440,6 +457,7 @@ Primary DB (writes)
 - Replication Lag (if using replicas)
 
 **Tools:**
+
 - AWS CloudWatch
 - Azure Monitor
 - Prometheus + Grafana (self-hosted)
@@ -476,12 +494,12 @@ curl http://localhost:3000/api/db-health
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Connection timeout | Check security group/firewall rules |
-| SSL certificate error | Add `?sslmode=require` to connection string |
-| Authentication failed | Verify username/password, check special character encoding |
-| Database does not exist | Create database manually via psql or console |
+| Issue                   | Solution                                                   |
+| ----------------------- | ---------------------------------------------------------- |
+| Connection timeout      | Check security group/firewall rules                        |
+| SSL certificate error   | Add `?sslmode=require` to connection string                |
+| Authentication failed   | Verify username/password, check special character encoding |
+| Database does not exist | Create database manually via psql or console               |
 
 ---
 
@@ -498,4 +516,4 @@ When documenting your setup, capture:
 
 ---
 
-*Last updated: February 2026*
+_Last updated: February 2026_
