@@ -5,6 +5,7 @@
 ### 1. Email Service Metrics to Monitor
 
 #### Core Email Metrics:
+
 - **Delivery Rate**: Percentage of emails successfully delivered
 - **Bounce Rate**: Percentage of emails that bounced
 - **Complaint Rate**: Percentage of spam complaints
@@ -12,6 +13,7 @@
 - **Click Rate**: Percentage of links clicked (if tracking enabled)
 
 #### Performance Metrics:
+
 - **Send Time**: Average time to send emails
 - **Retry Rate**: Percentage of emails requiring retries
 - **Error Rate**: API error frequency
@@ -20,6 +22,7 @@
 ### 2. AWS CloudWatch Setup (for AWS SES)
 
 #### Create Email Monitoring Dashboard:
+
 ```bash
 # Install AWS CLI if not already installed
 brew install awscli
@@ -29,6 +32,7 @@ aws configure
 ```
 
 #### CloudWatch Metrics Configuration:
+
 ```json
 {
   "DashboardName": "Medipole-Email-Monitoring",
@@ -70,6 +74,7 @@ aws configure
 ```
 
 #### CloudWatch Alarms:
+
 ```bash
 # High Bounce Rate Alarm
 aws cloudwatch put-metric-alarm \
@@ -99,6 +104,7 @@ aws cloudwatch put-metric-alarm \
 ### 3. SendGrid Monitoring Setup
 
 #### SendGrid Event Webhook Configuration:
+
 1. Go to Settings → Mail Settings
 2. Enable "Event Notification"
 3. Set HTTP POST URL: `https://yourdomain.com/api/email/webhook`
@@ -110,6 +116,7 @@ aws cloudwatch put-metric-alarm \
    - Spam Report
 
 #### Create Webhook Handler:
+
 ```typescript
 // src/app/api/email/webhook/route.ts
 import { NextResponse } from "next/server";
@@ -118,38 +125,38 @@ import { logger } from "@/lib/logger";
 export async function POST(req: Request) {
   try {
     const events = await req.json();
-    
+
     for (const event of events) {
       switch (event.event) {
         case "delivered":
-          logger.info("Email delivered", { 
+          logger.info("Email delivered", {
             messageId: event.message_id,
             email: event.email,
-            timestamp: event.timestamp
+            timestamp: event.timestamp,
           });
           break;
-          
+
         case "bounce":
           logger.warn("Email bounced", {
             messageId: event.message_id,
             email: event.email,
             reason: event.reason,
-            timestamp: event.timestamp
+            timestamp: event.timestamp,
           });
           // Add to bounce handling logic
           break;
-          
+
         case "spam_report":
           logger.error("Spam complaint received", {
             messageId: event.message_id,
             email: event.email,
-            timestamp: event.timestamp
+            timestamp: event.timestamp,
           });
           // Add to suppression list
           break;
       }
     }
-    
+
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error("Webhook processing failed", { error });
@@ -161,6 +168,7 @@ export async function POST(req: Request) {
 ### 4. Application-Level Monitoring
 
 #### Enhanced Logging Configuration:
+
 ```typescript
 // src/lib/email-monitoring.ts
 import { logger } from "./logger";
@@ -217,6 +225,7 @@ export class EmailMonitoring {
 ### 5. Alerting Configuration
 
 #### Slack Integration:
+
 ```bash
 # Create Slack webhook for alerts
 # Add to your .env.production:
@@ -224,12 +233,16 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK
 ```
 
 #### Alert Service Implementation:
+
 ```typescript
 // src/lib/alerts.ts
 import { logger } from "./logger";
 
 export class AlertService {
-  static async sendSlackAlert(message: string, channel: string = "email-alerts") {
+  static async sendSlackAlert(
+    message: string,
+    channel: string = "email-alerts"
+  ) {
     if (!process.env.SLACK_WEBHOOK_URL) {
       logger.warn("Slack webhook URL not configured");
       return;
@@ -289,6 +302,7 @@ export class AlertService {
 ### 6. Daily Reports
 
 #### Automated Daily Summary:
+
 ```typescript
 // src/app/api/email/report/route.ts
 import { NextResponse } from "next/server";
@@ -298,12 +312,12 @@ import { AlertService } from "@/lib/alerts";
 export async function GET() {
   try {
     const metrics = EmailMonitoring.getMetrics();
-    
+
     // Send daily report
     const report = `
 📊 Daily Email Service Report
 ============================
-Date: ${new Date().toISOString().split('T')[0]}
+Date: ${new Date().toISOString().split("T")[0]}
 
 📈 Metrics:
 - Total Emails Sent: ${metrics.totalSent}
@@ -313,16 +327,19 @@ Date: ${new Date().toISOString().split('T')[0]}
 - Error Rate: ${metrics.errorRate.toFixed(2)}%
 
 ⚠️ Issues:
-- High bounce rate: ${metrics.bounced > metrics.totalSent * 0.05 ? 'YES' : 'NO'}
-- Spam complaints: ${metrics.complaints > 0 ? 'YES' : 'NO'}
+- High bounce rate: ${metrics.bounced > metrics.totalSent * 0.05 ? "YES" : "NO"}
+- Spam complaints: ${metrics.complaints > 0 ? "YES" : "NO"}
 `;
 
     // Send to Slack or email
     await AlertService.sendSlackAlert(report, "email-reports");
-    
+
     return NextResponse.json({ success: true, report });
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 ```
@@ -335,22 +352,22 @@ export async function GET() {
   try {
     const emailService = createEmailService();
     const metrics = EmailMonitoring.getMetrics();
-    
+
     if (!emailService) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: "Email service not configured",
           config: {
             provider: process.env.EMAIL_PROVIDER || "not set",
-          }
-        }, 
+          },
+        },
         { status: 500 }
       );
     }
 
     const config = emailService.getConfig();
-    
+
     return NextResponse.json({
       success: true,
       message: "Email service is configured and ready",
@@ -365,8 +382,10 @@ export async function GET() {
         delivered: metrics.delivered,
         bounced: metrics.bounced,
         complaints: metrics.complaints,
-        deliveryRate: ((metrics.delivered / metrics.totalSent) * 100 || 0).toFixed(2) + "%",
-        bounceRate: ((metrics.bounced / metrics.totalSent) * 100 || 0).toFixed(2) + "%",
+        deliveryRate:
+          ((metrics.delivered / metrics.totalSent) * 100 || 0).toFixed(2) + "%",
+        bounceRate:
+          ((metrics.bounced / metrics.totalSent) * 100 || 0).toFixed(2) + "%",
       },
       timestamp: new Date().toISOString(),
     });
@@ -426,23 +445,23 @@ export default function EmailMonitoringDashboard() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Email Service Monitoring</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm font-medium">Total Sent</h3>
           <p className="text-3xl font-bold text-gray-900">{metrics?.metrics?.totalSent || 0}</p>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm font-medium">Delivery Rate</h3>
           <p className="text-3xl font-bold text-green-600">{metrics?.metrics?.deliveryRate || '0%'}</p>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm font-medium">Bounce Rate</h3>
           <p className="text-3xl font-bold text-yellow-600">{metrics?.metrics?.bounceRate || '0%'}</p>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-gray-500 text-sm font-medium">Complaints</h3>
           <p className="text-3xl font-bold text-red-600">{metrics?.metrics?.complaints || 0}</p>

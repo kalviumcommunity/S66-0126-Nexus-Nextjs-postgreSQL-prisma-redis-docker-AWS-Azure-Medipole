@@ -73,10 +73,7 @@ export default function LoginPage() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       {/* Left panel — hidden on mobile */}
-      <div
-        style={{ flex: "0 0 50%", display: "none" }}
-        className="lg:!flex"
-      >
+      <div style={{ flex: "0 0 50%", display: "none" }} className="lg:!flex">
         <div style={{ width: "100%", height: "100%" }}>
           <AuthLeftPanel />
         </div>
