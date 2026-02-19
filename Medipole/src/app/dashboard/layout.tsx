@@ -21,7 +21,11 @@ import { useUserStore } from "@/store/userStore";
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: AlertTriangle, label: "Emergency Requests", href: "/dashboard/emergency" },
+  {
+    icon: AlertTriangle,
+    label: "Emergency Requests",
+    href: "/dashboard/emergency",
+  },
   { icon: Clock, label: "Donation History", href: "/dashboard/history" },
   { icon: ShieldCheck, label: "Eligibility", href: "/dashboard/eligibility" },
   { icon: MapPin, label: "Nearby Map", href: "/dashboard/nearby" },

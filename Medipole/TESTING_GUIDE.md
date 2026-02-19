@@ -2,13 +2,13 @@
 
 ## 📋 Quick Reference
 
-| Task | Command |
-|------|---------|
-| **Start dev server** | `npm run dev` |
-| **Start prod server** | `npm run build && NODE_ENV=production npm start` |
-| **Test success** | `curl http://localhost:3000/api/test-demo?type=success` |
+| Task                      | Command                                                          |
+| ------------------------- | ---------------------------------------------------------------- |
+| **Start dev server**      | `npm run dev`                                                    |
+| **Start prod server**     | `npm run build && NODE_ENV=production npm start`                 |
+| **Test success**          | `curl http://localhost:3000/api/test-demo?type=success`          |
 | **Test validation error** | `curl http://localhost:3000/api/test-demo?type=validation-error` |
-| **View formatted JSON** | Add `\| jq '.'` to curl command |
+| **View formatted JSON**   | Add `\| jq '.'` to curl command                                  |
 
 ---
 
@@ -19,6 +19,7 @@ npm run dev
 ```
 
 You'll see output like:
+
 ```
 > next dev
   ▲ Next.js 15.x.x
@@ -37,6 +38,7 @@ curl http://localhost:3000/api/test-demo?type=success | jq '.'
 ```
 
 **Expected Response (Development):**
+
 ```json
 {
   "success": true,
@@ -57,6 +59,7 @@ curl http://localhost:3000/api/test-demo?type=validation-error | jq '.'
 ```
 
 **Expected Response (Development) - Details Shown:**
+
 ```json
 {
   "success": false,
@@ -83,6 +86,7 @@ curl http://localhost:3000/api/test-demo?type=db-error | jq '.'
 ```
 
 **Expected Response (Development) - Full Context:**
+
 ```json
 {
   "success": false,
@@ -110,6 +114,7 @@ curl http://localhost:3000/api/test-demo?type=auth-error | jq '.'
 ```
 
 **Expected Response (Development):**
+
 ```json
 {
   "success": false,
@@ -201,6 +206,7 @@ curl http://localhost:3000/api/test-demo?type=validation-error | jq '.'
 ```
 
 **Expected Response (Production) - Safe Message:**
+
 ```json
 {
   "success": false,
@@ -213,6 +219,7 @@ curl http://localhost:3000/api/test-demo?type=validation-error | jq '.'
 ```
 
 **Notice the differences:**
+
 - ✓ No detailed error message shown
 - ✓ No stack trace
 - ✓ Only error code (E001) for support reference
@@ -241,6 +248,7 @@ curl http://localhost:3000/api/test-demo?type=validation-error | jq '.'
 ```
 
 **Notice:**
+
 - ✓ Full context still logged server-side
 - ✓ Stack trace marked as [REDACTED]
 - ✓ Details not exposed to client
@@ -266,11 +274,13 @@ done
 ### Users Endpoint
 
 **Success:**
+
 ```bash
 curl http://localhost:3000/api/users?page=1&limit=10 | jq '.success,.message'
 ```
 
 **Invalid pagination:**
+
 ```bash
 curl http://localhost:3000/api/users?page=-1&limit=abc | jq '{success, message}'
 ```
@@ -278,11 +288,13 @@ curl http://localhost:3000/api/users?page=-1&limit=abc | jq '{success, message}'
 ### Donors Endpoint
 
 **Success:**
+
 ```bash
 curl http://localhost:3000/api/donors | jq '.success,.message'
 ```
 
 **Missing required field:**
+
 ```bash
 curl -X POST http://localhost:3000/api/donors \
   -H "Content-Type: application/json" \
@@ -294,6 +306,7 @@ curl -X POST http://localhost:3000/api/donors \
 ## 🎯 Key Observations
 
 ### Development Mode
+
 ```bash
 NODE_ENV=development npm run dev
 curl http://localhost:3000/api/test-demo?type=validation-error
@@ -302,9 +315,10 @@ curl http://localhost:3000/api/test-demo?type=validation-error
 ✓ Full error message  
 ✓ Complete stack trace  
 ✓ Detailed context  
-✓ Easy to debug  
+✓ Easy to debug
 
 ### Production Mode
+
 ```bash
 NODE_ENV=production npm start
 curl http://localhost:3000/api/test-demo?type=validation-error
@@ -313,7 +327,7 @@ curl http://localhost:3000/api/test-demo?type=validation-error
 ✓ Generic message  
 ✓ No stack trace  
 ✓ Error code for support  
-✓ User trust maintained  
+✓ User trust maintained
 
 ---
 
@@ -367,6 +381,7 @@ All tests pass when you see:
 ## 🆘 Troubleshooting
 
 **Server won't start**
+
 ```bash
 # Kill any existing process
 lsof -i :3000
@@ -377,6 +392,7 @@ npm run dev
 ```
 
 **JSON formatting issues**
+
 ```bash
 # Install jq if missing
 brew install jq  # macOS
@@ -384,6 +400,7 @@ apt-get install jq  # Linux
 ```
 
 **Different response in dev/prod?**
+
 ```bash
 # Verify NODE_ENV
 echo $NODE_ENV
@@ -405,5 +422,6 @@ NODE_ENV=production npm start
 ---
 
 **Navigation:**
+
 - [← Back to Implementation Summary](./IMPLEMENTATION_SUMMARY.md)
 - [← Back to README](./README.md)
