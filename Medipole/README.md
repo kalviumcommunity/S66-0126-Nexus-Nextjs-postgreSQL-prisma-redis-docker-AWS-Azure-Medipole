@@ -1502,6 +1502,34 @@ For complete testing documentation, see [TESTING_SETUP.md](./TESTING_SETUP.md)
 
 ---
 
+## CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment. The CI pipeline is defined in `.github/workflows/ci.yml` and includes the following stages:
+
+### Pipeline Stages
+
+1. **Lint**: Checks code style and quality using ESLint
+2. **Test**: Runs unit tests with Jest and generates coverage reports
+3. **Build**: Ensures the Next.js application builds successfully
+4. **Deploy**: Deploys the application to production (AWS/Azure) when pushing to main branch
+
+### Workflow Triggers
+
+- Push to `main` or `develop` branches
+- Pull requests targeting `main` or `develop` branches
+
+### Key Features
+
+- **Caching**: NPM dependencies are cached to speed up builds
+- **Concurrency**: Prevents overlapping runs on the same branch
+- **Security**: Uses GitHub Secrets for sensitive environment variables
+
+### Viewing Results
+
+Navigate to the repository's Actions tab to view pipeline runs, logs, and coverage reports.
+
+---
+
 ## Hospital
 
 ### GET

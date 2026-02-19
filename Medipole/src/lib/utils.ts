@@ -1,3 +1,15 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+/**
+ * Utility function to combine class names with Tailwind CSS
+ * @param inputs - Class values to combine
+ * @returns Merged class string
+ */
+export const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};
+
 /**
  * Utility function to validate email format
  * @param email - Email string to validate
