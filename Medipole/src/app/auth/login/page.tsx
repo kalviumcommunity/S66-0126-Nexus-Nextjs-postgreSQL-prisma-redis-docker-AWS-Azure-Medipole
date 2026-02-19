@@ -34,25 +34,49 @@ export default function LoginPage() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
 
-    login({
-      name: "Sreedhil Pavishanker B",
-      email: form.email,
-      phone: "9876543210",
-      role: "DONOR",
-      bloodGroup: "O+",
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    toast.success("Welcome back!");
-    setLoading(false);
-    router.push("/dashboard");
+      const data = await res.json();
+
+      if (!data.success) {
+        toast.error(data.message || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      login(
+        {
+          id: data.user.id,
+          name: data.user.name,
+          email: data.user.email,
+          phone: "",
+          role: data.user.role,
+        },
+        data.token
+      );
+
+      toast.success("Welcome back!");
+      router.push("/dashboard");
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       {/* Left panel — hidden on mobile */}
-      <div style={{ flex: "0 0 50%", display: "none" }} className="lg:!flex">
+      <div
+        style={{ flex: "0 0 50%", display: "none" }}
+        className="lg:!flex"
+      >
         <div style={{ width: "100%", height: "100%" }}>
           <AuthLeftPanel />
         </div>

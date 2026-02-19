@@ -6,7 +6,6 @@
  * test the responses in both development and production environments.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { handleError, handleSuccess } from "@/lib/errorHandler";
 import {
   ValidationError,

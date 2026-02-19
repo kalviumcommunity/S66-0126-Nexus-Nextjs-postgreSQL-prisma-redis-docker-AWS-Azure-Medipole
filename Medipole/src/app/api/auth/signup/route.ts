@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
+import { generateToken } from "@/lib/jwt";
 
 export async function POST(req: Request) {
   try {
@@ -23,19 +24,52 @@ export async function POST(req: Request) {
       );
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const userRole = role || "DONOR";
 
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: role || "DONOR",
+        role: userRole,
       },
+    });
+
+    if (userRole === "DONOR") {
+      await prisma.donorProfile.create({
+        data: {
+          userId: user.id,
+          bloodGroup: "O_POSITIVE",
+        },
+      });
+    } else if (userRole === "HOSPITAL") {
+      await prisma.hospitalProfile.create({
+        data: {
+          userId: user.id,
+          name: name,
+          address: "",
+        },
+      });
+    } else if (userRole === "NGO") {
+      await prisma.nGOProfile.create({
+        data: {
+          userId: user.id,
+          organizationName: name,
+        },
+      });
+    }
+
+    const token = generateToken({
+      id: user.id,
+      email: user.email,
+      role: user.role,
     });
 
     return NextResponse.json({
       success: true,
       message: "Signup successful",
+      userId: user.id,
+      token,
     });
   } catch (error) {
     return NextResponse.json(

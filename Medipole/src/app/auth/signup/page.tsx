@@ -63,18 +63,45 @@ function SignupForm() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
 
-    login({
-      name: form.name,
-      email: form.email,
-      phone: "",
-      role: form.role,
-    });
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          role: form.role,
+        }),
+      });
 
-    toast.success("Account created successfully!");
-    setLoading(false);
-    router.push("/dashboard");
+      const data = await res.json();
+
+      if (!data.success) {
+        toast.error(data.message || "Signup failed");
+        setLoading(false);
+        return;
+      }
+
+      login(
+        {
+          id: data.userId || "",
+          name: form.name,
+          email: form.email,
+          phone: "",
+          role: form.role,
+        },
+        data.token || ""
+      );
+
+      toast.success("Account created successfully!");
+      router.push("/dashboard");
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
