@@ -34,17 +34,13 @@ export async function GET(request: NextRequest, context: any) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // 2️⃣ Store in cache
     await redis.set(cacheKey, JSON.stringify(user), "EX", CACHE_TTL);
 
     return NextResponse.json(user);
-
   } catch (error) {
     console.error("Error fetching user:", error);
     return NextResponse.json(
@@ -86,13 +82,9 @@ export async function PATCH(request: NextRequest, context: any) {
     }
 
     return NextResponse.json(user);
-
   } catch (error: any) {
     if (error.code === "P2025") {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     console.error("Error updating user:", error);
@@ -125,13 +117,9 @@ export async function DELETE(request: NextRequest, context: any) {
       { message: "User deleted successfully" },
       { status: 200 }
     );
-
   } catch (error: any) {
     if (error.code === "P2025") {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     console.error("Error deleting user:", error);

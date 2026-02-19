@@ -7,7 +7,7 @@ import {
 } from "@/lib/errorHandler";
 import { logger } from "@/lib/logger";
 
-const CACHE_TTL = 60; 
+const CACHE_TTL = 60;
 
 export async function GET(request: Request) {
   const startTime = Date.now();
@@ -92,12 +92,7 @@ export async function GET(request: Request) {
       },
     };
 
-    await redis.set(
-      cacheKey,
-      JSON.stringify(responsePayload),
-      "EX",
-      CACHE_TTL
-    );
+    await redis.set(cacheKey, JSON.stringify(responsePayload), "EX", CACHE_TTL);
 
     const duration = Date.now() - startTime;
 
@@ -112,7 +107,6 @@ export async function GET(request: Request) {
       200,
       context
     );
-
   } catch (error) {
     return handleError(error, context);
   }
@@ -143,13 +137,7 @@ export async function POST(request: Request) {
       userId: newUser.id,
     });
 
-    return handleSuccess(
-      newUser,
-      "User created successfully",
-      201,
-      context
-    );
-
+    return handleSuccess(newUser, "User created successfully", 201, context);
   } catch (error) {
     return handleError(error, context);
   }
