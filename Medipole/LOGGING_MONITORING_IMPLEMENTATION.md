@@ -7,6 +7,7 @@ This implementation provides comprehensive application logging and monitoring ca
 ## Importance of Logging and Monitoring
 
 ### Key Benefits
+
 - **Application Performance**: Track response times, throughput, and bottlenecks
 - **Error Detection**: Early identification of failures and anomalies
 - **Resource Utilization**: Monitor CPU, memory, and system resources
@@ -14,11 +15,12 @@ This implementation provides comprehensive application logging and monitoring ca
 - **Compliance**: Audit trails for security and regulatory requirements
 
 ### Monitoring Layers
-| Layer | Example Metric | Cloud Service |
-|-------|---------------|---------------|
-| Application | API response time, error count | CloudWatch Logs / Azure Application Insights |
-| Infrastructure | CPU, memory, disk, network | CloudWatch Metrics / Azure Monitor |
-| Alerts | Error threshold or downtime | CloudWatch Alarms / Azure Alerts |
+
+| Layer          | Example Metric                 | Cloud Service                                |
+| -------------- | ------------------------------ | -------------------------------------------- |
+| Application    | API response time, error count | CloudWatch Logs / Azure Application Insights |
+| Infrastructure | CPU, memory, disk, network     | CloudWatch Metrics / Azure Monitor           |
+| Alerts         | Error threshold or downtime    | CloudWatch Alarms / Azure Alerts             |
 
 ## Implementation Components
 
@@ -27,6 +29,7 @@ This implementation provides comprehensive application logging and monitoring ca
 Production-ready logging utility with JSON formatting:
 
 #### Key Features:
+
 - **Structured JSON output** for better searchability
 - **Correlation IDs** for request tracing
 - **Multiple log levels** (debug, info, warn, error)
@@ -34,13 +37,14 @@ Production-ready logging utility with JSON formatting:
 - **Specialized loggers** for HTTP, database, and security events
 
 #### Usage Examples:
+
 ```typescript
 import { logger, generateRequestId } from "@/lib/logger";
 
 // Basic logging
 logger.info("User registered successfully", {
   userId: "user-123",
-  email: "user@example.com"
+  email: "user@example.com",
 });
 
 // HTTP request logging
@@ -51,13 +55,14 @@ logger.http("POST", "/api/users", 201, 45, { requestId });
 logger.error("Database connection failed", {
   error: {
     message: error.message,
-    stack: error.stack
+    stack: error.stack,
   },
-  component: "database"
+  component: "database",
 });
 ```
 
 #### Log Structure:
+
 ```json
 {
   "timestamp": "2024-01-01T00:00:00.000Z",
@@ -75,33 +80,36 @@ logger.error("Database connection failed", {
 Comprehensive metrics system with Prometheus support:
 
 #### Metric Types:
+
 - **Counter**: Monotonically increasing values (request counts)
 - **Gauge**: Instantaneous values (current users, memory usage)
 - **Histogram**: Distribution of values (response times)
 - **Summary**: Quantile calculations (latency percentiles)
 
 #### Predefined Metrics:
+
 ```typescript
 // HTTP Metrics
-http_requests_total
-http_request_duration_seconds
-http_errors_total
+http_requests_total;
+http_request_duration_seconds;
+http_errors_total;
 
 // Database Metrics
-db_queries_total
-db_query_duration_seconds
+db_queries_total;
+db_query_duration_seconds;
 
 // Business Metrics
-users_registered_total
-emails_sent_total
-active_users
+users_registered_total;
+emails_sent_total;
+active_users;
 
 // System Metrics
-memory_usage_bytes
-cpu_usage_percent
+memory_usage_bytes;
+cpu_usage_percent;
 ```
 
 #### Usage Examples:
+
 ```typescript
 import { metrics } from "@/lib/metrics";
 
@@ -125,12 +133,14 @@ metrics.collector.set("current_value", 42);
 REST API for metrics exposure and management:
 
 #### Endpoints:
+
 - **GET `/api/metrics`**: Retrieve current metrics (JSON format)
 - **GET `/api/metrics?format=prometheus`**: Prometheus format
 - **POST `/api/metrics`**: Update metrics manually
 - **DELETE `/api/metrics`**: Reset all metrics
 
 #### API Examples:
+
 ```bash
 # Get metrics in JSON format
 curl http://localhost:3000/api/metrics
@@ -152,6 +162,7 @@ curl -X DELETE http://localhost:3000/api/metrics
 Interactive testing page for logging and monitoring:
 
 #### Features:
+
 - Real-time metrics visualization
 - Log level testing
 - Manual metric manipulation
@@ -163,6 +174,7 @@ Interactive testing page for logging and monitoring:
 ### AWS CloudWatch Setup
 
 #### 1. ECS Task Definition Configuration
+
 Add logging configuration to your task definition:
 
 ```json
@@ -179,18 +191,22 @@ Add logging configuration to your task definition:
 ```
 
 #### 2. CloudWatch Logs Setup
+
 1. Go to CloudWatch → Logs → Log groups
 2. Create log group: `/ecs/medipole-app`
 3. Set retention period (7-14 days for operational logs)
 
 #### 3. Metric Filters and Alarms
+
 Create metric filters for error tracking:
+
 ```
 Filter Pattern: { $.level = "error" }
 Metric Name: ApplicationErrors
 ```
 
 Create CloudWatch alarms:
+
 - **High Error Rate**: > 10 errors in 5 minutes
 - **High CPU Usage**: > 80% for 5 minutes
 - **Slow Response Time**: > 2 seconds average
@@ -198,12 +214,15 @@ Create CloudWatch alarms:
 ### Azure Monitor Setup
 
 #### 1. App Service Configuration
+
 1. Go to App Service → Monitoring → Diagnostic settings
 2. Enable Application Logging
 3. Configure Log Analytics Workspace
 
 #### 2. Custom Metrics
+
 Use Kusto queries for monitoring:
+
 ```kql
 // Error tracking
 AppServiceConsoleLogs
@@ -217,7 +236,9 @@ AppRequests
 ```
 
 #### 3. Alert Rules
+
 Create alert rules in Azure Monitor:
+
 - **HTTP Server Errors**: > 5% error rate
 - **High Response Time**: > 2 seconds average
 - **Memory Usage**: > 80% utilization
@@ -225,24 +246,28 @@ Create alert rules in Azure Monitor:
 ## Best Practices Implemented
 
 ### 1. Structured Logging
+
 - **Consistent Format**: JSON structure with standardized fields
 - **Correlation IDs**: Request tracing across services
 - **Context Enrichment**: Automatic addition of service/component info
 - **Level Appropriateness**: Proper use of debug/info/warn/error levels
 
 ### 2. Metrics Strategy
+
 - **Four Golden Signals**: Latency, traffic, errors, saturation
 - **RED Method**: Rate, Errors, Duration for services
 - **USE Method**: Utilization, Saturation, Errors for resources
 - **Business Metrics**: User registrations, email delivery, conversions
 
 ### 3. Alert Configuration
+
 - **Meaningful Thresholds**: Based on historical data and business impact
 - **Multiple Channels**: Email, Slack, SMS notifications
 - **Escalation Policies**: Different response times for different severity levels
 - **False Positive Reduction**: Proper alert deduplication and grouping
 
 ### 4. Retention Strategy
+
 - **Operational Logs**: 7-14 days (troubleshooting)
 - **Audit Logs**: 90+ days (compliance)
 - **Metrics**: 30-90 days (trend analysis)
@@ -251,6 +276,7 @@ Create alert rules in Azure Monitor:
 ## Environment Configuration
 
 ### Required Environment Variables
+
 ```env
 # Logging Configuration
 LOG_LEVEL=info
@@ -263,6 +289,7 @@ LOG_GROUP_NAME=/ecs/medipole-app
 ```
 
 ### Docker Configuration
+
 ```dockerfile
 # Enable CloudWatch logging in container
 ENV LOG_LEVEL=info
@@ -272,6 +299,7 @@ ENV LOG_FORMAT=json
 ## Testing and Validation
 
 ### Local Testing
+
 1. Visit `/logging-monitoring-test` to test the implementation
 2. Generate test logs at different levels
 3. Manipulate metrics manually
@@ -279,6 +307,7 @@ ENV LOG_FORMAT=json
 5. Check Prometheus format output
 
 ### API Testing
+
 ```bash
 # Test logging endpoint
 curl -X POST http://localhost:3000/api/test-logging \
@@ -290,6 +319,7 @@ curl http://localhost:3000/api/metrics
 ```
 
 ### Cloud Platform Verification
+
 1. **AWS**: Check CloudWatch Logs for structured JSON entries
 2. **Azure**: Verify Application Insights telemetry
 3. **Prometheus**: Test metric endpoint scraping
@@ -298,6 +328,7 @@ curl http://localhost:3000/api/metrics
 ## Monitoring Dashboard Examples
 
 ### Key Metrics to Track
+
 ```
 Application Layer:
 - HTTP Request Rate (requests/second)
@@ -319,6 +350,7 @@ Business Layer:
 ```
 
 ### Sample Alert Thresholds
+
 - **Critical**: Error rate > 10%, Response time > 5s
 - **Warning**: Error rate > 5%, Response time > 2s
 - **Info**: CPU usage > 80%, Memory usage > 85%
@@ -328,22 +360,27 @@ Business Layer:
 ### Common Issues
 
 #### 1. Missing Logs in CloudWatch
+
 - **Cause**: Incorrect log group configuration
 - **Solution**: Verify task definition log configuration
 
 #### 2. Metrics Not Appearing
+
 - **Cause**: Metrics collector not initialized
 - **Solution**: Check metrics API endpoint availability
 
 #### 3. Alert Fatigue
+
 - **Cause**: Too many low-priority alerts
 - **Solution**: Review and adjust alert thresholds
 
 #### 4. Performance Impact
+
 - **Cause**: Excessive logging or metric collection
 - **Solution**: Optimize log levels and sampling rates
 
 ### Debugging Steps
+
 1. Check local console output for log format
 2. Verify CloudWatch/Azure Monitor configuration
 3. Test metrics API endpoints
@@ -353,6 +390,7 @@ Business Layer:
 ## Future Enhancements
 
 ### Planned Features
+
 1. **Distributed Tracing**: OpenTelemetry integration
 2. **Advanced Analytics**: Machine learning for anomaly detection
 3. **Multi-tenancy**: Per-tenant metrics and logging
@@ -360,6 +398,7 @@ Business Layer:
 5. **Automated Remediation**: Self-healing based on metrics
 
 ### Integration Opportunities
+
 - **Service Mesh**: Istio/Linkerd metrics integration
 - **Database Monitoring**: Query performance analytics
 - **Frontend Monitoring**: Client-side error tracking
