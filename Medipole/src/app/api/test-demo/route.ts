@@ -31,7 +31,12 @@ export async function GET(request: Request) {
   };
 
   try {
-    logger.info("Starting test request", { context });
+    logger.info("Starting test request", {
+      metadata: {
+        endpoint: context.endpoint,
+        method: context.method,
+      },
+    });
 
     // Route handling based on test type
     switch (testType) {

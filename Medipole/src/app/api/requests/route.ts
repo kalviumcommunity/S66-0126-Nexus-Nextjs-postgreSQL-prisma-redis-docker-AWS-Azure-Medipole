@@ -34,10 +34,11 @@ export async function GET(request: Request) {
     const where = status ? { status: status as any } : {};
 
     logger.debug("Fetching blood requests", {
-      context,
-      status,
-      page,
-      limit,
+      metadata: {
+        status,
+        page,
+        limit,
+      },
     });
 
     const [requests, total] = await Promise.all([
@@ -61,9 +62,11 @@ export async function GET(request: Request) {
     ]);
 
     const duration = Date.now() - startTime;
-    logger.perf("GET /api/requests", duration, true, {
-      context,
-      requestCount: requests.length,
+    logger.info("GET /api/requests completed", {
+      metadata: {
+        duration,
+        requestCount: requests.length,
+      },
     });
 
     return handleSuccess(
@@ -117,10 +120,11 @@ export async function POST(request: Request) {
     }
 
     logger.debug("Creating blood request", {
-      context,
-      hospitalId,
-      bloodGroup,
-      unitsRequired,
+      metadata: {
+        hospitalId,
+        bloodGroup,
+        unitsRequired,
+      },
     });
 
     const bloodRequest = await prisma.bloodRequest.create({
@@ -142,9 +146,11 @@ export async function POST(request: Request) {
     });
 
     const duration = Date.now() - startTime;
-    logger.perf("POST /api/requests", duration, true, {
-      context,
-      requestId: bloodRequest.id,
+    logger.info("POST /api/requests completed", {
+      metadata: {
+        duration,
+        requestId: bloodRequest.id,
+      },
     });
 
     return handleSuccess(

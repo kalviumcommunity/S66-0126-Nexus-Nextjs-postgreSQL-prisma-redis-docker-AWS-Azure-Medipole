@@ -72,8 +72,10 @@ class EmailService {
         logger.info(
           `Sending email to ${message.to} via ${this.provider} (attempt ${attempt}/${this.maxRetries})`,
           {
-            subject: message.subject,
-            sandboxMode: this.sandboxMode,
+            metadata: {
+              subject: message.subject,
+              sandboxMode: this.sandboxMode,
+            },
           }
         );
 
@@ -85,10 +87,12 @@ class EmailService {
       } catch (error) {
         lastError = error as Error;
         logger.warn(`Email sending attempt ${attempt} failed`, {
-          error: lastError.message,
-          provider: this.provider,
-          to: message.to,
-          attempt,
+          metadata: {
+            error: lastError.message,
+            provider: this.provider,
+            to: message.to,
+            attempt,
+          },
         });
 
         // Don't retry on validation errors or final attempt
@@ -102,10 +106,12 @@ class EmailService {
     }
 
     logger.error("Email sending failed after all retries", {
-      error: lastError?.message,
-      provider: this.provider,
-      to: message.to,
-      attempts: this.maxRetries,
+      metadata: {
+        error: lastError?.message,
+        provider: this.provider,
+        to: message.to,
+        attempts: this.maxRetries,
+      },
     });
 
     return {
@@ -161,7 +167,9 @@ class EmailService {
 
     try {
       const response = await this.sesClient.send(command);
-      logger.info("Email sent via SES", { messageId: response.MessageId });
+      logger.info("Email sent via SES", {
+        metadata: { messageId: response.MessageId },
+      });
       return { success: true, messageId: response.MessageId };
     } catch (error) {
       throw error;
@@ -187,7 +195,9 @@ class EmailService {
       const response = await sgMail.send(msg);
       const messageId =
         (response[0]?.headers?.["x-message-id"] as string) || "unknown";
-      logger.info("Email sent via SendGrid", { messageId });
+      logger.info("Email sent via SendGrid", {
+        metadata: { messageId },
+      });
       return { success: true, messageId };
     } catch (error) {
       throw error;
@@ -449,7 +459,9 @@ export function createEmailService(): EmailService | null {
 
   if (!configResult.valid) {
     logger.error("Email configuration invalid", {
-      errors: configResult.errors,
+      metadata: {
+        errors: configResult.errors,
+      },
     });
     return null;
   }

@@ -36,10 +36,11 @@ export async function GET(request: Request) {
     const where = bloodGroup ? { bloodGroup: bloodGroup as any } : {};
 
     logger.debug("Fetching donors", {
-      context,
-      page,
-      limit,
-      bloodGroup,
+      metadata: {
+        page,
+        limit,
+        bloodGroup,
+      },
     });
 
     const [donors, total] = await Promise.all([
@@ -60,9 +61,11 @@ export async function GET(request: Request) {
     ]);
 
     const duration = Date.now() - startTime;
-    logger.perf("GET /api/donors", duration, true, {
-      context,
-      donorCount: donors.length,
+    logger.info("GET /api/donors completed", {
+      metadata: {
+        duration,
+        donorCount: donors.length,
+      },
     });
 
     return handleSuccess(
@@ -105,9 +108,10 @@ export async function POST(request: Request) {
     }
 
     logger.debug("Creating donor profile", {
-      context,
-      userId,
-      bloodGroup,
+      metadata: {
+        userId,
+        bloodGroup,
+      },
     });
 
     const donor = await prisma.donorProfile.create({
@@ -129,9 +133,11 @@ export async function POST(request: Request) {
     });
 
     const duration = Date.now() - startTime;
-    logger.perf("POST /api/donors", duration, true, {
-      context,
-      donorId: donor.id,
+    logger.info("POST /api/donors completed", {
+      metadata: {
+        duration,
+        donorId: donor.id,
+      },
     });
 
     return handleSuccess(

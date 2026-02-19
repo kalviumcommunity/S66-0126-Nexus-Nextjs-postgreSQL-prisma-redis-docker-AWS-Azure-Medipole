@@ -124,10 +124,12 @@ export async function POST(req: Request) {
 
     if (result.success) {
       logger.info("Email sent successfully", {
-        to: validatedData.to,
-        subject: validatedData.subject,
-        messageId: result.messageId,
-        provider: emailService.getConfig().provider,
+        metadata: {
+          to: validatedData.to,
+          subject: validatedData.subject,
+          messageId: result.messageId,
+          provider: emailService.getConfig().provider,
+        },
       });
 
       return NextResponse.json({
@@ -138,9 +140,11 @@ export async function POST(req: Request) {
       });
     } else {
       logger.error("Email sending failed", {
-        to: validatedData.to,
-        subject: validatedData.subject,
-        error: result.error,
+        metadata: {
+          to: validatedData.to,
+          subject: validatedData.subject,
+          error: result.error,
+        },
       });
 
       return NextResponse.json(
@@ -153,7 +157,11 @@ export async function POST(req: Request) {
     }
   } catch (error) {
     if (error instanceof z.ZodError) {
-      logger.error("Email request validation failed", { issues: error.issues });
+      logger.error("Email request validation failed", {
+        metadata: {
+          issues: error.issues,
+        },
+      });
       return NextResponse.json(
         {
           success: false,

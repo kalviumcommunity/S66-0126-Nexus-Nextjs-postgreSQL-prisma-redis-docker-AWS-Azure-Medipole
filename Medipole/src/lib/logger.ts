@@ -1,169 +1,274 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+import { randomUUID } from "crypto";
 
-/**
- * Structured Logger Utility
- *
- * This module provides a centralized logging mechanism with structured JSON output
- * for better observability and debugging across all environments.
- *
- * Features:
- * - Environment-aware logging (dev shows full details, prod redacts sensitive info)
- * - Structured JSON format for easy parsing by log aggregation tools
- * - Timestamps and request context tracking
- * - Performance monitoring with duration tracking
- */
+// Log levels
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
-export interface LogContext {
+// Log structure
+export interface LogEntry {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
   requestId?: string;
+  correlationId?: string;
+  service?: string;
+  component?: string;
   userId?: string;
   endpoint?: string;
   method?: string;
-  [key: string]: any;
-}
-
-export interface LogMeta {
-  context?: LogContext;
-  duration?: number; // in milliseconds
-  stack?: string;
-  [key: string]: any;
-}
-
-const isDevelopment = process.env.NODE_ENV === "development";
-const isProduction = process.env.NODE_ENV === "production";
-
-/**
- * Config for sensitive fields that should be redacted in production
- */
-const SENSITIVE_FIELDS = [
-  "password",
-  "token",
-  "secret",
-  "apiKey",
-  "Authorization",
-  "accessToken",
-  "refreshToken",
-];
-
-/**
- * Redact sensitive information from objects
- */
-function redactSensitiveData(obj: any): any {
-  if (!isProduction || !obj || typeof obj !== "object") {
-    return obj;
-  }
-
-  const redacted = { ...obj };
-  for (const field of SENSITIVE_FIELDS) {
-    if (field in redacted) {
-      redacted[field] = "[REDACTED]";
-    }
-  }
-  return redacted;
-}
-
-/**
- * Format log output based on environment
- */
-function formatLog(
-  level: "info" | "warn" | "error" | "debug",
-  message: string,
-  meta?: LogMeta
-) {
-  const timestamp = new Date().toISOString();
-
-  const logEntry: any = {
-    timestamp,
-    level,
-    message,
-    environment: process.env.NODE_ENV || "unknown",
+  statusCode?: number;
+  duration?: number;
+  error?: {
+    message: string;
+    stack?: string;
+    code?: string;
   };
-
-  if (meta) {
-    const { context, duration, stack, ...rest } = meta;
-
-    if (context) {
-      logEntry.context = redactSensitiveData(context);
-    }
-
-    if (duration !== undefined) {
-      logEntry.duration_ms = duration;
-    }
-
-    // In production, redact stack traces; in development, show them
-    if (stack) {
-      logEntry.stack = isDevelopment ? stack : "[REDACTED]";
-    }
-
-    // Add remaining metadata
-    logEntry.meta = redactSensitiveData(rest);
-  }
-
-  return logEntry;
+  metadata?: Record<string, any>;
 }
 
-/**
- * Logger object with methods for different log levels
- */
-export const logger = {
-  /**
-   * Log informational messages
-   */
-  info: (message: string, meta?: LogMeta) => {
-    const logEntry = formatLog("info", message, meta);
-    console.log(JSON.stringify(logEntry));
-  },
+// Logger configuration
+interface LoggerConfig {
+  service: string;
+  component: string;
+  level: LogLevel;
+  format: "json" | "pretty";
+}
 
-  /**
-   * Log warning messages
-   */
-  warn: (message: string, meta?: LogMeta) => {
-    const logEntry = formatLog("warn", message, meta);
-    console.warn(JSON.stringify(logEntry));
-  },
+class StructuredLogger {
+  private config: LoggerConfig;
 
-  /**
-   * Log error messages with stack traces
-   */
-  error: (message: string, meta?: LogMeta) => {
-    const logEntry = formatLog("error", message, meta);
-    console.error(JSON.stringify(logEntry));
-  },
-
-  /**
-   * Log debug messages (only shown in development)
-   */
-  debug: (message: string, meta?: LogMeta) => {
-    if (isDevelopment) {
-      const logEntry = formatLog("debug", message, meta);
-      console.debug(JSON.stringify(logEntry));
-    }
-  },
-
-  /**
-   * Convenience method for logging with context
-   */
-  withContext: (context: LogContext) => {
-    return {
-      info: (message: string, meta?: Omit<LogMeta, "context">) =>
-        logger.info(message, { ...meta, context }),
-      warn: (message: string, meta?: Omit<LogMeta, "context">) =>
-        logger.warn(message, { ...meta, context }),
-      error: (message: string, meta?: Omit<LogMeta, "context">) =>
-        logger.error(message, { ...meta, context }),
-      debug: (message: string, meta?: Omit<LogMeta, "context">) =>
-        logger.debug(message, { ...meta, context }),
+  constructor(config: Partial<LoggerConfig> = {}) {
+    this.config = {
+      service: config.service || "medipole-app",
+      component: config.component || "unknown",
+      level: config.level || "info",
+      format: config.format || "json",
     };
-  },
+  }
 
-  /**
-   * Log performance metrics
-   */
-  perf: (operation: string, duration: number, success: boolean, meta?: any) => {
-    const level = success ? "info" : "warn";
-    logger[level](`Performance: ${operation}`, {
-      duration,
-      success,
-      ...meta,
+  private shouldLog(level: LogLevel): boolean {
+    const levels: LogLevel[] = ["debug", "info", "warn", "error"];
+    const currentLevelIndex = levels.indexOf(this.config.level);
+    const messageLevelIndex = levels.indexOf(level);
+    return messageLevelIndex >= currentLevelIndex;
+  }
+
+  private formatLog(entry: LogEntry): string {
+    if (this.config.format === "pretty") {
+      const timestamp = new Date(entry.timestamp).toISOString();
+      const prefix = `[${timestamp}] [${entry.level.toUpperCase()}] [${entry.service}/${entry.component}]`;
+      const message = entry.message;
+      const details = Object.entries(entry)
+        .filter(
+          ([key]) =>
+            !["timestamp", "level", "message", "service", "component"].includes(
+              key
+            )
+        )
+        .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+        .join(", ");
+
+      return `${prefix} ${message}${details ? ` | ${details}` : ""}`;
+    }
+
+    return JSON.stringify(entry);
+  }
+
+  private log(
+    level: LogLevel,
+    message: string,
+    data: Partial<LogEntry> = {}
+  ): void {
+    if (!this.shouldLog(level)) return;
+
+    const entry: LogEntry = {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      service: this.config.service,
+      component: this.config.component,
+      ...data,
+    };
+
+    console.log(this.formatLog(entry));
+  }
+
+  // Public logging methods
+  debug(message: string, data?: Partial<LogEntry>): void {
+    this.log("debug", message, data);
+  }
+
+  info(message: string, data?: Partial<LogEntry>): void {
+    this.log("info", message, data);
+  }
+
+  warn(message: string, data?: Partial<LogEntry>): void {
+    this.log("warn", message, data);
+  }
+
+  error(message: string, data?: Partial<LogEntry>): void {
+    this.log("error", message, data);
+  }
+
+  // Specialized logging methods
+  http(
+    method: string,
+    endpoint: string,
+    statusCode: number,
+    duration: number,
+    data?: Partial<LogEntry>
+  ): void {
+    this.info(`${method} ${endpoint} ${statusCode}`, {
+      ...data,
+      metadata: {
+        method,
+        endpoint,
+        statusCode,
+        duration,
+        ...(data?.metadata || {}),
+      },
     });
-  },
-};
+  }
+
+  database(
+    operation: string,
+    table: string,
+    duration: number,
+    data?: Partial<LogEntry>
+  ): void {
+    this.info(`DB ${operation} on ${table}`, {
+      ...data,
+      metadata: {
+        operation,
+        table,
+        duration,
+        ...(data?.metadata || {}),
+      },
+    });
+  }
+
+  security(
+    action: string,
+    userId: string,
+    ip: string,
+    data?: Partial<LogEntry>
+  ): void {
+    this.info(`Security: ${action}`, {
+      ...data,
+      metadata: {
+        action,
+        userId,
+        ip,
+        ...(data?.metadata || {}),
+      },
+    });
+  }
+
+  // Create child logger with inherited config
+  child(config: Partial<LoggerConfig>): StructuredLogger {
+    return new StructuredLogger({
+      ...this.config,
+      ...config,
+    });
+  }
+
+  // Get current configuration
+  getConfig(): LoggerConfig {
+    return { ...this.config };
+  }
+
+  // Update configuration
+  setConfig(config: Partial<LoggerConfig>): void {
+    this.config = { ...this.config, ...config };
+  }
+}
+
+// Create default logger instance
+export const logger = new StructuredLogger({
+  service: "medipole-app",
+  component: "main",
+  level: (process.env.LOG_LEVEL as LogLevel) || "info",
+  format: (process.env.LOG_FORMAT as "json" | "pretty") || "json",
+});
+
+// Export logger class for custom instances
+export { StructuredLogger };
+
+// Utility functions
+export function generateRequestId(): string {
+  return randomUUID();
+}
+
+export function withRequestLogging<T>(
+  handler: (requestId: string) => Promise<T>
+): Promise<T> {
+  const requestId = generateRequestId();
+
+  logger.info("Request started", { requestId });
+
+  const startTime = Date.now();
+
+  return handler(requestId)
+    .then((result) => {
+      const duration = Date.now() - startTime;
+      logger.info("Request completed", { requestId, duration });
+      return result;
+    })
+    .catch((error) => {
+      const duration = Date.now() - startTime;
+      logger.error("Request failed", {
+        requestId,
+        duration,
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+      });
+      throw error;
+    });
+}
+
+// Middleware for Next.js API routes
+export function createApiLogger(component: string) {
+  const apiLogger = logger.child({ component });
+
+  return {
+    logRequest: (method: string, endpoint: string, requestId: string) => {
+      apiLogger.info("API request received", {
+        requestId,
+        method,
+        endpoint,
+      });
+    },
+
+    logResponse: (
+      method: string,
+      endpoint: string,
+      requestId: string,
+      statusCode: number,
+      duration: number
+    ) => {
+      apiLogger.http(method, endpoint, statusCode, duration, {
+        requestId,
+      });
+    },
+
+    logError: (
+      method: string,
+      endpoint: string,
+      requestId: string,
+      error: Error,
+      duration: number
+    ) => {
+      apiLogger.error("API request failed", {
+        requestId,
+        method,
+        endpoint,
+        duration,
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+      });
+    },
+  };
+}
