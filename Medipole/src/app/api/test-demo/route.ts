@@ -65,35 +65,27 @@ export async function GET(request: Request) {
         throw new AuthenticationError("Invalid authentication token");
 
       case "internal-error":
-        throw new Error(
-          "Unexpected internal error - simulated for testing"
-        );
+        throw new Error("Unexpected internal error - simulated for testing");
 
       case "not-found": {
-        const NotFoundError = (
-          await import("@/lib/errorHandler")
-        ).NotFoundError;
+        const NotFoundError = (await import("@/lib/errorHandler"))
+          .NotFoundError;
         throw new NotFoundError("User");
       }
 
       case "authorization-error": {
-        const AuthorizationError = (
-          await import("@/lib/errorHandler")
-        ).AuthorizationError;
+        const AuthorizationError = (await import("@/lib/errorHandler"))
+          .AuthorizationError;
         throw new AuthorizationError("You do not have permission");
       }
 
       case "business-error": {
-        const BusinessError = (
-          await import("@/lib/errorHandler")
-        ).BusinessError;
-        throw new BusinessError(
-          "Insufficient inventory for blood donation",
-          {
-            required: 5,
-            available: 2,
-          }
-        );
+        const BusinessError = (await import("@/lib/errorHandler"))
+          .BusinessError;
+        throw new BusinessError("Insufficient inventory for blood donation", {
+          required: 5,
+          available: 2,
+        });
       }
 
       default:

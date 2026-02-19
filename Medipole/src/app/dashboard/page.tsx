@@ -147,13 +147,28 @@ export default function DashboardPage() {
         }}
       >
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 700, color: "#111827", margin: 0 }}>
+          <h1
+            style={{
+              fontSize: 26,
+              fontWeight: 700,
+              color: "#111827",
+              margin: 0,
+            }}
+          >
             Welcome Back,{" "}
             <span style={{ color: "#b91c1c", fontStyle: "italic" }}>
               {user?.name || "Sreedhil Pavishanker B"}
             </span>
           </h1>
-          <p style={{ fontSize: 14, color: "#6b7280", marginTop: 6, margin: 0, marginBlockStart: 6 }}>
+          <p
+            style={{
+              fontSize: 14,
+              color: "#6b7280",
+              marginTop: 6,
+              margin: 0,
+              marginBlockStart: 6,
+            }}
+          >
             Your contributions are saving lives. Thank you for being a hero.
           </p>
         </div>
@@ -178,10 +193,12 @@ export default function DashboardPage() {
             transition: "all 0.2s",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = "#b91c1c";
+            (e.currentTarget as HTMLButtonElement).style.borderColor =
+              "#b91c1c";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = "#d1d5db";
+            (e.currentTarget as HTMLButtonElement).style.borderColor =
+              "#d1d5db";
           }}
         >
           <HandHeart style={{ width: 18, height: 18, color: "#111827" }} />
@@ -197,7 +214,8 @@ export default function DashboardPage() {
       >
         <div
           style={{
-            background: "linear-gradient(135deg, #166534 0%, #15803d 50%, #16a34a 100%)",
+            background:
+              "linear-gradient(135deg, #166534 0%, #15803d 50%, #16a34a 100%)",
             borderRadius: 16,
             padding: "20px 28px",
             display: "flex",
@@ -222,7 +240,14 @@ export default function DashboardPage() {
               <CheckCircle style={{ width: 24, height: 24, color: "white" }} />
             </div>
             <div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: "white", margin: 0 }}>
+              <h3
+                style={{
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: "white",
+                  margin: 0,
+                }}
+              >
                 You&apos;re Eligible to Donate!
               </h3>
               <p
@@ -233,7 +258,8 @@ export default function DashboardPage() {
                   marginTop: 4,
                 }}
               >
-                You can donate blood today. Find a nearby blood bank and save lives.
+                You can donate blood today. Find a nearby blood bank and save
+                lives.
               </p>
             </div>
           </div>
@@ -255,7 +281,8 @@ export default function DashboardPage() {
               transition: "all 0.2s",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.9)";
+              (e.currentTarget as HTMLButtonElement).style.background =
+                "rgba(255,255,255,0.9)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.background = "white";
@@ -306,13 +333,29 @@ export default function DashboardPage() {
                   justifyContent: "center",
                 }}
               >
-                <stat.icon style={{ width: 20, height: 20, color: stat.iconColor }} />
+                <stat.icon
+                  style={{ width: 20, height: 20, color: stat.iconColor }}
+                />
               </div>
               <div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: "#111827", lineHeight: 1.1 }}>
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 700,
+                    color: "#111827",
+                    lineHeight: 1.1,
+                  }}
+                >
                   {stat.value}
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginTop: 4 }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: "#374151",
+                    marginTop: 4,
+                  }}
+                >
                   {stat.label}
                 </div>
                 {stat.sub && (
@@ -333,12 +376,33 @@ export default function DashboardPage() {
         animate="visible"
         variants={fadeUp}
       >
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 4,
+          }}
+        >
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: 0 }}>
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: "#111827",
+                margin: 0,
+              }}
+            >
               Emergency Requests Near You
             </h2>
-            <p style={{ fontSize: 13, color: "#6b7280", margin: 0, marginTop: 4 }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "#6b7280",
+                margin: 0,
+                marginTop: 4,
+              }}
+            >
               Blood request matching your blood type
             </p>
           </div>
@@ -438,7 +502,12 @@ export default function DashboardPage() {
                     {req.urgency}
                   </span>
                   <Droplets
-                    style={{ width: 16, height: 16, color: "#b91c1c", marginLeft: "auto" }}
+                    style={{
+                      width: 16,
+                      height: 16,
+                      color: "#b91c1c",
+                      marginLeft: "auto",
+                    }}
                   />
                 </div>
 
@@ -451,21 +520,44 @@ export default function DashboardPage() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <MapPin style={{ width: 14, height: 14, color: "#9ca3af" }} />
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 4 }}
+                  >
+                    <MapPin
+                      style={{ width: 14, height: 14, color: "#9ca3af" }}
+                    />
                     <span style={{ fontSize: 12, color: "#6b7280" }}>
                       {req.distance}
                     </span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <Clock style={{ width: 14, height: 14, color: "#9ca3af" }} />
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 4 }}
+                  >
+                    <Clock
+                      style={{ width: 14, height: 14, color: "#9ca3af" }}
+                    />
                     <span style={{ fontSize: 12, color: "#6b7280" }}>
                       {req.time}
                     </span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: "auto" }}>
-                    <Phone style={{ width: 14, height: 14, color: "#16a34a" }} />
-                    <span style={{ fontSize: 12, color: "#16a34a", fontWeight: 600 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                      marginLeft: "auto",
+                    }}
+                  >
+                    <Phone
+                      style={{ width: 14, height: 14, color: "#16a34a" }}
+                    />
+                    <span
+                      style={{
+                        fontSize: 12,
+                        color: "#16a34a",
+                        fontWeight: 600,
+                      }}
+                    >
                       {req.phone}
                     </span>
                   </div>
@@ -556,10 +648,12 @@ export default function DashboardPage() {
                     transition: "background 0.2s",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = "#991b1b";
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      "#991b1b";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = "#b91c1c";
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      "#b91c1c";
                   }}
                 >
                   Accept
@@ -578,10 +672,12 @@ export default function DashboardPage() {
                     transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = "#f9fafb";
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      "#f9fafb";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = "white";
+                    (e.currentTarget as HTMLButtonElement).style.background =
+                      "white";
                   }}
                 >
                   Decline

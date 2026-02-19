@@ -9,7 +9,8 @@ export default function AuthLeftPanel() {
         position: "relative",
         width: "100%",
         height: "100%",
-        background: "linear-gradient(160deg, #991b1b 0%, #b91c1c 40%, #7f1d1d 100%)",
+        background:
+          "linear-gradient(160deg, #991b1b 0%, #b91c1c 40%, #7f1d1d 100%)",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
