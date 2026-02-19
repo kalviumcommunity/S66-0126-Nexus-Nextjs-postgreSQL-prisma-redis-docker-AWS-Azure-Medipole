@@ -1528,6 +1528,12 @@ This project uses GitHub Actions for continuous integration and deployment. The 
 
 Navigate to the repository's Actions tab to view pipeline runs, logs, and coverage reports.
 
+### Reflections
+
+- **Caching and Concurrency**: Caching NPM dependencies significantly reduces installation time in subsequent runs, improving CI performance. Concurrency control prevents multiple pipeline runs on the same branch from overlapping, ensuring efficient resource usage and avoiding redundant executions.
+- **Secrets Management**: Using GitHub Secrets ensures that sensitive credentials like AWS keys are never exposed in code or logs, maintaining security best practices and preventing accidental leaks.
+- **Importance of CI in Collaborative Environments**: CI automates testing and validation, catching issues early and maintaining code quality across team contributions. It enables faster iterations, reduces integration problems, and builds confidence in deployments.
+
 ---
 
 ## Hospital
