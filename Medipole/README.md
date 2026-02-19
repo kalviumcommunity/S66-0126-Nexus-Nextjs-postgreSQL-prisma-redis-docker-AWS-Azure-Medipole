@@ -1166,6 +1166,264 @@ This comprehensive error handling system ensures that Medipole remains reliable,
 
 <!-- _Above: Screenshot of the Medipole application running locally showing the main dashboard interface._ -->
 
+## 📧 Email Service Integration
+
+### Overview
+
+Medipole includes a robust email service that supports both AWS SES and SendGrid for sending transactional emails. This service provides pre-built templates, comprehensive error handling, and detailed logging for reliable email delivery.
+
+### Quick Setup
+
+1. **Install Dependencies** (already done):
+
+   ```bash
+   npm install @aws-sdk/client-ses @sendgrid/mail
+   ```
+
+2. **Configure Environment Variables**:
+   Create `.env.local` with your email provider configuration:
+
+   For AWS SES:
+
+   ```env
+   EMAIL_PROVIDER=ses
+   AWS_ACCESS_KEY_ID=your-aws-access-key
+   AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+   AWS_REGION=ap-south-1
+   SES_EMAIL_SENDER=no-reply@yourdomain.com
+   SES_SANDBOX_MODE=true
+   EMAIL_FROM_NAME=Medipole
+   ```
+
+   For SendGrid:
+
+   ```env
+   EMAIL_PROVIDER=sendgrid
+   SENDGRID_API_KEY=your-sendgrid-api-key
+   SENDGRID_SENDER=no-reply@yourdomain.com
+   SENDGRID_SANDBOX_MODE=true
+   EMAIL_FROM_NAME=Medipole
+   ```
+
+3. **Start the Application**:
+   ```bash
+   npm run dev
+   ```
+
+### API Endpoints
+
+#### Health Check
+
+```bash
+GET /api/email
+```
+
+#### Send Email
+
+```bash
+POST /api/email
+```
+
+**Request Examples:**
+
+Welcome Email:
+
+```json
+{
+  "to": "user@example.com",
+  "subject": "Welcome to Medipole!",
+  "template": "welcome",
+  "templateData": {
+    "userName": "John Doe",
+    "verificationLink": "https://medipole.com/verify/abc123"
+  }
+}
+```
+
+Password Reset:
+
+```json
+{
+  "to": "user@example.com",
+  "subject": "Password Reset Request",
+  "template": "passwordReset",
+  "templateData": {
+    "userName": "John Doe",
+    "resetLink": "https://medipole.com/reset-password/xyz789",
+    "expiryHours": 24
+  }
+}
+```
+
+Notification:
+
+```json
+{
+  "to": "user@example.com",
+  "subject": "Blood Request Update",
+  "template": "notification",
+  "templateData": {
+    "userName": "John Doe",
+    "title": "Blood Request Status",
+    "message": "Your donation request has been approved",
+    "actionLink": "https://medipole.com/dashboard",
+    "actionText": "View Dashboard"
+  }
+}
+```
+
+Custom HTML:
+
+```json
+{
+  "to": "user@example.com",
+  "subject": "Custom Email",
+  "html": "<h1>Custom Content</h1><p>Any HTML here</p>"
+}
+```
+
+### Testing
+
+#### Automated Test Script
+
+```bash
+./test-email-service.sh
+```
+
+#### Manual Testing
+
+```bash
+# Health check
+curl -X GET http://localhost:3000/api/email
+
+# Send test email
+curl -X POST http://localhost:3000/api/email \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "test@example.com",
+    "subject": "Test Email",
+    "template": "welcome",
+    "templateData": {
+      "userName": "Test User",
+      "verificationLink": "https://medipole.com/verify/test"
+    }
+  }'
+```
+
+### Email Templates
+
+The service includes three pre-built responsive HTML templates:
+
+- **Welcome Template**: For new user signups with verification links
+- **Password Reset Template**: For password recovery with expiration notices
+- **Notification Template**: For general notifications with customizable actions
+
+All templates are mobile-responsive and include proper styling for major email clients.
+
+### Verification & Logging
+
+#### Console Output
+
+Successful emails show:
+
+```
+info: Sending email to user@example.com via ses
+info: Email sent via SES Message ID: 0101018d-1234...
+```
+
+#### Message ID Tracking
+
+Each response includes a `messageId` for delivery tracking:
+
+- AWS SES: Direct message ID from SES
+- SendGrid: Message ID from response headers
+
+### Sandbox vs Production
+
+#### AWS SES
+
+- **Sandbox**: Both sender and recipient must be verified
+- **Production**: Full sending capabilities
+- **Rate Limit**: 14 emails/second initially
+
+#### SendGrid
+
+- **Sandbox**: Sender verification required
+- **Production**: 100 emails/day free tier
+- **Rate Limit**: Depends on plan
+
+### Production Considerations
+
+#### Rate Limiting
+
+- Implement queuing for bulk sends
+- Monitor delivery rates and bounces
+- Set up retry logic with exponential backoff
+
+#### Security
+
+- Never commit `.env.local` to version control
+- Rotate API keys regularly
+- Use IAM roles when possible (AWS)
+
+#### Monitoring
+
+- Track delivery and bounce rates
+- Monitor service health endpoints
+- Implement logging for all operations
+
+### Common Issues
+
+**Configuration Errors:**
+
+```
+Error: Email service not configured properly
+```
+
+**Solution**: Check `.env.local` variables
+
+**AWS SES Sandbox Errors:**
+
+```
+Error: Email address is not verified
+```
+
+**Solution**: Verify emails in AWS SES console
+
+**SendGrid Authentication:**
+
+```
+Error: Unauthorized
+```
+
+**Solution**: Verify API key and sender
+
+### Integration Examples
+
+#### User Signup Flow
+
+```javascript
+const response = await fetch("/api/email", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    to: user.email,
+    subject: "Welcome to Medipole!",
+    template: "welcome",
+    templateData: {
+      userName: user.name,
+      verificationLink: `${BASE_URL}/verify/${user.verificationToken}`,
+    },
+  }),
+});
+```
+
+### Documentation
+
+For complete documentation, see [EMAIL_SERVICE.md](./EMAIL_SERVICE.md)
+
+---
+
 ## Hospital
 
 ### GET
