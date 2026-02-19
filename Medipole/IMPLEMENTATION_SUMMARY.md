@@ -17,6 +17,7 @@ A production-ready structured logging system with:
 - **Request context**: Correlate errors with specific requests
 
 **Key Methods:**
+
 ```typescript
 logger.info(message, meta?)      // Information messages
 logger.error(message, meta?)     // Error messages with context
@@ -30,7 +31,7 @@ logger.withContext(context)      // Contextual logging
 
 A type-safe, centralized error handling system with:
 
-- **Custom Error Classes**: 
+- **Custom Error Classes**:
   - `ValidationError` (400)
   - `DatabaseError` (500)
   - `AuthenticationError` (401)
@@ -45,10 +46,11 @@ A type-safe, centralized error handling system with:
 - **Safe Response Generation**: Different responses for dev vs production
 
 **Key Functions:**
+
 ```typescript
-handleError(error, context)           // Main error handler
-handleSuccess(data, message, code)    // Success response wrapper
-withErrorHandler(handler, context)    // Async error wrapper
+handleError(error, context); // Main error handler
+handleSuccess(data, message, code); // Success response wrapper
+withErrorHandler(handler, context); // Async error wrapper
 ```
 
 #### 3. ✅ Updated API Routes
@@ -61,6 +63,7 @@ Integrated error handling in core routes:
 - **[src/app/api/requests/route.ts](src/app/api/requests/route.ts)** - Blood request handling
 
 All routes now:
+
 - Validate input with structured error messages
 - Log performance metrics
 - Handle database errors gracefully
@@ -90,12 +93,14 @@ curl http://localhost:3000/api/test-demo?type=business-error
 #### 5. ✅ Comprehensive Documentation
 
 **[README.md](README.md) - New Section:** "🔒 Centralized Error Handling & Structured Logging"
+
 - Architecture overview
 - Usage examples
 - Development vs production comparison
 - Integration guide
 
 **[ERROR_HANDLING_TESTING.md](ERROR_HANDLING_TESTING.md)** - Testing Guide
+
 - Step-by-step instructions for both environments
 - Expected outputs for each error type
 - curl commands for manual testing
@@ -103,6 +108,7 @@ curl http://localhost:3000/api/test-demo?type=business-error
 - Log monitoring techniques
 
 **[ERROR_HANDLING_EVIDENCE.md](ERROR_HANDLING_EVIDENCE.md)** - Evidence & Analysis
+
 - Implementation details
 - Dev vs prod behavior comparison
 - Performance impact analysis
@@ -117,18 +123,20 @@ curl http://localhost:3000/api/test-demo?type=business-error
 ### Quick Start
 
 1. **Start development server:**
+
    ```bash
    npm run dev
    ```
 
 2. **In another terminal, test error handling:**
+
    ```bash
    # Test successful response
    curl http://localhost:3000/api/test-demo?type=success | jq '.'
-   
+
    # Test validation error (shows full details)
    curl http://localhost:3000/api/test-demo?type=validation-error | jq '.'
-   
+
    # Test database error
    curl http://localhost:3000/api/test-demo?type=db-error | jq '.'
    ```
@@ -151,6 +159,7 @@ curl http://localhost:3000/api/test-demo?type=validation-error
 ```
 
 **Observe the difference:**
+
 - **Development Response**: Full stack trace, detailed error information
 - **Production Response**: Generic message, error code only
 
@@ -184,6 +193,7 @@ echo "✓ Tests complete!"
 ### Validation Error Example
 
 #### Development Response
+
 ```json
 {
   "success": false,
@@ -201,6 +211,7 @@ echo "✓ Tests complete!"
 ```
 
 **Console Log:**
+
 ```json
 {
   "timestamp": "2026-02-13T15:00:10.000Z",
@@ -217,6 +228,7 @@ echo "✓ Tests complete!"
 ```
 
 #### Production Response
+
 ```json
 {
   "success": false,
@@ -227,6 +239,7 @@ echo "✓ Tests complete!"
 ```
 
 **Console Log (Server-Side Only):**
+
 ```json
 {
   "timestamp": "2026-02-13T15:01:00.000Z",
@@ -244,30 +257,36 @@ echo "✓ Tests complete!"
 ## 🔍 Error Codes Reference
 
 ### Validation (400)
+
 - `E001`: VALIDATION_ERROR
 - `E002`: MISSING_REQUIRED_FIELD
 - `E003`: INVALID_FORMAT
 
 ### Authentication/Authorization
+
 - `E101`: UNAUTHORIZED (401)
 - `E102`: FORBIDDEN (403)
 - `E103`: TOKEN_EXPIRED (401)
 
 ### Resources
+
 - `E201`: NOT_FOUND (404)
 - `E202`: ALREADY_EXISTS (409)
 - `E203`: CONFLICT (409)
 
 ### Database
+
 - `E301`: DATABASE_FAILURE (500)
 - `E302`: CONNECTION_ERROR (500)
 - `E303`: TRANSACTION_FAILED (500)
 
 ### Business Logic
+
 - `E601`: BUSINESS_RULE_VIOLATION (400)
 - `E602`: INVALID_OPERATION (400)
 
 ### Internal
+
 - `E500`: INTERNAL_ERROR (500)
 - `E501`: UNEXPECTED_ERROR (500)
 
@@ -276,28 +295,33 @@ echo "✓ Tests complete!"
 ## 🎯 Key Features Implemented
 
 ✅ **Consistency**
+
 - All errors follow uniform response format
 - Standardized error codes for reference
 - Synchronized across all API routes
 
 ✅ **Security**
+
 - Stack traces hidden in production
 - Sensitive fields (passwords, tokens) redacted
 - Generic user messages prevent information disclosure
 
 ✅ **Observability**
+
 - Structured JSON logs for monitoring tools
 - Request context preservation
 - Performance metrics tracking
 - Error categorization for analytics
 
 ✅ **Developer Experience**
+
 - Full details in development for rapid debugging
 - Type-safe custom error classes
 - Integrated with TypeScript for compile-time safety
 - Clear error messages guide fixing
 
 ✅ **User Experience**
+
 - Professional, non-technical error messages
 - Error codes for support reference
 - Suggests actions (e.g., "try again later")
@@ -310,27 +334,31 @@ echo "✓ Tests complete!"
 The structured JSON format is ready for integration with:
 
 ### CloudWatch (AWS)
+
 ```javascript
 logger.error("Operation failed", {
   context: { endpoint: "/api/users" },
-  errorCode: "E301"
+  errorCode: "E301",
 });
 // Automatically sent to CloudWatch logs
 ```
 
 ### ELK Stack
+
 ```javascript
 // JSON automatically indexed by Elasticsearch
 // Query: filter(errorCode: "E301").aggregate(count)
 ```
 
 ### Datadog
+
 ```javascript
 // Agent picks up JSON logs and parses automatically
 // Create monitors: alert when errorCode == "E301"
 ```
 
 ### Sentry
+
 ```javascript
 // Send errors to Sentry for aggregation
 // Get notifications on new error patterns
@@ -341,22 +369,26 @@ logger.error("Operation failed", {
 ## 📈 Scalability Roadmap
 
 ### Phase 1: ✅ Complete
+
 - Structured logging system
 - Centralized error handling
 - Development vs production behavior
 - Error categorization
 
 ### Phase 2: Integration Ready
+
 - CloudWatch/CloudLogging
 - Error dashboards
 - Alert thresholds
 
 ### Phase 3: Advanced Monitoring
+
 - Error trend analysis
 - Anomaly detection
 - Predictive alerting
 
 ### Phase 4: Intelligence
+
 - AI-powered error categorization
 - Automated fix suggestions
 - Self-healing systems
@@ -366,6 +398,7 @@ logger.error("Operation failed", {
 ## 🤔 Reflection: Impact on Debugging & User Trust
 
 ### Before Centralized Error Handling
+
 ```
 Problems:
 - Errors scattered across route handlers
@@ -376,6 +409,7 @@ Problems:
 ```
 
 ### After Centralized Error Handling
+
 ```
 Benefits:
 ✓ Single point for all error handling
@@ -389,6 +423,7 @@ Benefits:
 ### User Trust Building
 
 **Professional Error Response:**
+
 ```json
 {
   "success": false,
@@ -398,12 +433,14 @@ Benefits:
 ```
 
 **Why This Works:**
+
 1. **Professional** - Polished, error-free
 2. **Safe** - No technical details
 3. **Actionable** - Clear action to try
 4. **Referable** - Error code for support
 
 **Support Workflow:**
+
 ```
 Customer: "I got error E301"
 Support: grep -r "E301" logs/
@@ -415,6 +452,7 @@ Support: grep -r "E301" logs/
 ### Debugging Efficiency
 
 **Development Advantage:**
+
 ```
 Stack trace in console → Pin-point issue location
 Detailed context → Understand failed operation
@@ -427,24 +465,25 @@ Performance metrics → Identify bottlenecks
 
 ## 📝 Files Overview
 
-| File | Size | Purpose |
-|------|------|---------|
-| `src/lib/logger.ts` | 4.1 KB | Structured logging utility |
-| `src/lib/errorHandler.ts` | 8.5 KB | Centralized error handling |
-| `src/app/api/test-demo/route.ts` | 3.2 KB | Interactive error testing |
-| `src/app/api/users/route.ts` | 2.5 KB | Updated with error handling |
-| `src/app/api/donors/route.ts` | 4.8 KB | Updated with error handling |
-| `src/app/api/inventory/route.ts` | 5.2 KB | Updated with error handling |
-| `src/app/api/requests/route.ts` | 5.3 KB | Updated with error handling |
-| `README.md` | +3.2 KB | New error handling section |
-| `ERROR_HANDLING_TESTING.md` | 12 KB | Comprehensive testing guide |
-| `ERROR_HANDLING_EVIDENCE.md` | 15 KB | Implementation evidence |
+| File                             | Size    | Purpose                     |
+| -------------------------------- | ------- | --------------------------- |
+| `src/lib/logger.ts`              | 4.1 KB  | Structured logging utility  |
+| `src/lib/errorHandler.ts`        | 8.5 KB  | Centralized error handling  |
+| `src/app/api/test-demo/route.ts` | 3.2 KB  | Interactive error testing   |
+| `src/app/api/users/route.ts`     | 2.5 KB  | Updated with error handling |
+| `src/app/api/donors/route.ts`    | 4.8 KB  | Updated with error handling |
+| `src/app/api/inventory/route.ts` | 5.2 KB  | Updated with error handling |
+| `src/app/api/requests/route.ts`  | 5.3 KB  | Updated with error handling |
+| `README.md`                      | +3.2 KB | New error handling section  |
+| `ERROR_HANDLING_TESTING.md`      | 12 KB   | Comprehensive testing guide |
+| `ERROR_HANDLING_EVIDENCE.md`     | 15 KB   | Implementation evidence     |
 
 ---
 
 ## ✨ Next Steps
 
 1. **Run tests:**
+
    ```bash
    npm run dev
    curl http://localhost:3000/api/test-demo?type=validation-error
@@ -483,6 +522,7 @@ Performance metrics → Identify bottlenecks
 ### Answer:
 
 **Before This System:**
+
 - Users see cryptic stack traces → lose trust
 - Support gets flooded with unclear reports
 - Developers waste time reconstructing error context
@@ -497,9 +537,11 @@ Performance metrics → Identify bottlenecks
 2. **Support says:** "Reference error code E500"
 
 3. **Developer checks logs:**
+
    ```bash
    grep "E500" /var/log/medipole/app.log | jq '.'
    ```
+
    - Sees full error context (database, network, etc.)
    - Sees request context (userId, endpoint, etc.)
    - Sees performance metrics (duration, timeout, etc.)

@@ -80,10 +80,7 @@ function SignupForm() {
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       {/* Left panel — hidden on mobile */}
-      <div
-        style={{ flex: "0 0 50%", display: "none" }}
-        className="lg:!flex"
-      >
+      <div style={{ flex: "0 0 50%", display: "none" }} className="lg:!flex">
         <div style={{ width: "100%", height: "100%" }}>
           <AuthLeftPanel />
         </div>
@@ -341,9 +338,7 @@ function SignupForm() {
                     height: 44,
                     borderRadius: 8,
                     paddingRight: 44,
-                    borderColor: errors.confirmPassword
-                      ? "#ef4444"
-                      : "#e5e7eb",
+                    borderColor: errors.confirmPassword ? "#ef4444" : "#e5e7eb",
                   }}
                 />
                 <button

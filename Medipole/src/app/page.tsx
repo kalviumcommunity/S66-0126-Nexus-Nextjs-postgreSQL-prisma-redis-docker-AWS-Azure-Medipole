@@ -129,7 +129,15 @@ export default function Home() {
             height: 64,
           }}
         >
-          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+          <Link
+            href="/"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              textDecoration: "none",
+            }}
+          >
             <div
               style={{
                 width: 36,
@@ -144,7 +152,9 @@ export default function Home() {
             >
               <Droplets style={{ width: 20, height: 20, color: "#b91c1c" }} />
             </div>
-            <span style={{ fontSize: 20, fontWeight: 700, color: "#111827" }}>Medipole</span>
+            <span style={{ fontSize: 20, fontWeight: 700, color: "#111827" }}>
+              Medipole
+            </span>
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -152,7 +162,13 @@ export default function Home() {
               <Button
                 variant="outline"
                 className="rounded-full"
-                style={{ padding: "0 24px", height: 40, fontSize: 14, fontWeight: 500, borderColor: "#d1d5db" }}
+                style={{
+                  padding: "0 24px",
+                  height: 40,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  borderColor: "#d1d5db",
+                }}
               >
                 Sign In
               </Button>
@@ -160,7 +176,14 @@ export default function Home() {
             <Link href="/auth/signup">
               <Button
                 className="rounded-full"
-                style={{ padding: "0 24px", height: 40, fontSize: 14, fontWeight: 500, background: "#b91c1c", color: "#fff" }}
+                style={{
+                  padding: "0 24px",
+                  height: 40,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  background: "#b91c1c",
+                  color: "#fff",
+                }}
               >
                 Get Started
               </Button>
@@ -188,7 +211,14 @@ export default function Home() {
               marginBottom: 32,
             }}
           >
-            <Heart style={{ width: 16, height: 16, color: "#b91c1c", fill: "#b91c1c" }} />
+            <Heart
+              style={{
+                width: 16,
+                height: 16,
+                color: "#b91c1c",
+                fill: "#b91c1c",
+              }}
+            />
             <span style={{ fontSize: 14, fontWeight: 500, color: "#991b1b" }}>
               Blood shortages aren&apos;t physical. They&apos;re informational.
             </span>
@@ -227,9 +257,9 @@ export default function Home() {
               marginRight: "auto",
             }}
           >
-            Medipole connects blood donors with hospitals and blood banks in real-
-            time. Find nearby donation centers, respond to emergencies, and track your
-            impact.
+            Medipole connects blood donors with hospitals and blood banks in
+            real- time. Find nearby donation centers, respond to emergencies,
+            and track your impact.
           </motion.p>
 
           {/* CTA buttons */}
@@ -237,7 +267,12 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.24 }}
-            style={{ marginTop: 40, display: "flex", justifyContent: "center", gap: 16 }}
+            style={{
+              marginTop: 40,
+              display: "flex",
+              justifyContent: "center",
+              gap: 16,
+            }}
           >
             <Link href="/auth/signup">
               <Button
@@ -253,7 +288,8 @@ export default function Home() {
                   gap: 8,
                 }}
               >
-                Start Saving Lives <ArrowRight style={{ width: 18, height: 18 }} />
+                Start Saving Lives{" "}
+                <ArrowRight style={{ width: 18, height: 18 }} />
               </Button>
             </Link>
             <Link href="/auth/signup?role=HOSPITAL">
@@ -306,10 +342,19 @@ export default function Home() {
               }}
               whileHover={{ boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
             >
-              <div style={{ fontSize: 28, fontWeight: 700, color: "#b91c1c", lineHeight: 1.2 }}>
+              <div
+                style={{
+                  fontSize: 28,
+                  fontWeight: 700,
+                  color: "#b91c1c",
+                  lineHeight: 1.2,
+                }}
+              >
                 {stat.value}
               </div>
-              <div style={{ fontSize: 13, color: "#9ca3af", marginTop: 4 }}>{stat.label}</div>
+              <div style={{ fontSize: 13, color: "#9ca3af", marginTop: 4 }}>
+                {stat.label}
+              </div>
             </motion.div>
           ))}
         </div>
@@ -327,11 +372,28 @@ export default function Home() {
             custom={0}
             style={{ textAlign: "center", marginBottom: 48 }}
           >
-            <h2 style={{ fontSize: 32, fontWeight: 700, color: "#111827", margin: 0 }}>
+            <h2
+              style={{
+                fontSize: 32,
+                fontWeight: 700,
+                color: "#111827",
+                margin: 0,
+              }}
+            >
               Powerful Features for Everyone
             </h2>
-            <p style={{ marginTop: 16, fontSize: 17, color: "#6b7280", maxWidth: 520, marginLeft: "auto", marginRight: "auto" }}>
-              Whether you&apos;re a donor, hospital, or organization, Medipole has the tools you need.
+            <p
+              style={{
+                marginTop: 16,
+                fontSize: 17,
+                color: "#6b7280",
+                maxWidth: 520,
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              Whether you&apos;re a donor, hospital, or organization, Medipole
+              has the tools you need.
             </p>
           </motion.div>
 
@@ -373,12 +435,28 @@ export default function Home() {
                     marginBottom: 16,
                   }}
                 >
-                  <f.Icon style={{ width: 22, height: 22, color: f.iconColor }} />
+                  <f.Icon
+                    style={{ width: 22, height: 22, color: f.iconColor }}
+                  />
                 </div>
-                <h3 style={{ fontSize: 16, fontWeight: 600, color: "#111827", marginBottom: 8 }}>
+                <h3
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: "#111827",
+                    marginBottom: 8,
+                  }}
+                >
                   {f.title}
                 </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.6, color: "#9ca3af", margin: 0 }}>
+                <p
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: "#9ca3af",
+                    margin: 0,
+                  }}
+                >
                   {f.desc}
                 </p>
               </motion.div>
@@ -399,7 +477,14 @@ export default function Home() {
             custom={0}
             style={{ textAlign: "center", marginBottom: 48 }}
           >
-            <h2 style={{ fontSize: 32, fontWeight: 700, color: "#111827", margin: 0 }}>
+            <h2
+              style={{
+                fontSize: 32,
+                fontWeight: 700,
+                color: "#111827",
+                margin: 0,
+              }}
+            >
               How It Works
             </h2>
             <p style={{ marginTop: 16, fontSize: 17, color: "#6b7280" }}>
@@ -445,12 +530,28 @@ export default function Home() {
                     marginBottom: 16,
                   }}
                 >
-                  <item.Icon style={{ width: 22, height: 22, color: item.iconColor }} />
+                  <item.Icon
+                    style={{ width: 22, height: 22, color: item.iconColor }}
+                  />
                 </div>
-                <h3 style={{ fontSize: 16, fontWeight: 600, color: "#111827", marginBottom: 8 }}>
+                <h3
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: "#111827",
+                    marginBottom: 8,
+                  }}
+                >
                   {item.title}
                 </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.6, color: "#9ca3af", margin: 0 }}>
+                <p
+                  style={{
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: "#9ca3af",
+                    margin: 0,
+                  }}
+                >
                   {item.desc}
                 </p>
               </motion.div>
@@ -476,7 +577,15 @@ export default function Home() {
             textAlign: "center",
           }}
         >
-          <h2 style={{ fontSize: 34, fontWeight: 700, color: "#fff", margin: 0, marginBottom: 16 }}>
+          <h2
+            style={{
+              fontSize: 34,
+              fontWeight: 700,
+              color: "#fff",
+              margin: 0,
+              marginBottom: 16,
+            }}
+          >
             Ready to Make a Difference ?
           </h2>
           <p
@@ -488,8 +597,8 @@ export default function Home() {
               lineHeight: 1.6,
             }}
           >
-            Join thousands of heroes who are saving lives every day. Your donation
-            could be someone&apos;s second chance.
+            Join thousands of heroes who are saving lives every day. Your
+            donation could be someone&apos;s second chance.
           </p>
           <Link href="/auth/signup">
             <Button
@@ -532,7 +641,12 @@ export default function Home() {
               <Link
                 key={t}
                 href="#"
-                style={{ fontSize: 14, color: "#9ca3af", textDecoration: "none", transition: "color 0.15s" }}
+                style={{
+                  fontSize: 14,
+                  color: "#9ca3af",
+                  textDecoration: "none",
+                  transition: "color 0.15s",
+                }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#111827")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
               >
