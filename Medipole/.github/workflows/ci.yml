@@ -15,16 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: 18
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
 
       - name: Run ESLint
@@ -33,10 +33,10 @@ jobs:
       - name: Run Unit Tests
         run: npm test -- --coverage
 
-      - name: Build Next.js app
+      - name: Build Application
         run: npm run build
 
-      - name: Deploy (Example for AWS)
+      - name: Deploy (Optional)
         if: github.ref == 'refs/heads/main'
         run: echo "Deploying application..."
-        # Actual deployment step can integrate with AWS CLI, ECS, or Azure Web App
+        # Replace with actual deployment command for AWS or Azure
